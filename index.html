@@ -6,7 +6,6 @@
   <title>Luxury Search -- Full Version</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-
 </head>
 <body>
 
@@ -26,33 +25,41 @@
     </div>
   </div>
 
-
   <div class="results-root" style="display:none;">
-  <div class="results-header">
-    <h2 id="queryTitle"></h2>
-  </div>
-  <div class="results-container">
-    <div class="results-grid"></div>
+    <div class="results-header">
+      <h2 id="queryTitle"></h2>
+    </div>
+    <div class="results-container">
+      <div class="results-grid"></div>
+    </div>
+
+    <!-- Trigger po lewej -->
+    <div class="scroll-trigger">
+      <div class="trigger-dot"></div>
+    </div>
   </div>
 
-  <!-- Trigger po lewej -->
-  <div class="scroll-trigger">
-    <div class="trigger-dot"></div>
+  <div class="settings-overlay" id="settingsOverlay">
+    <div class="settings-panel">
+      <div class="settings-close-line"></div>
+
+      <div class="dot-container">
+        <div class="dot" data-layer="layer1">
+          <img src="https://pic.onlinewebfonts.com/thumbnails/icons_154090.svg" alt="X">
+        </div>
+        <div class="dot" data-layer="layer2">
+          <img src="https://pic.onlinewebfonts.com/thumbnails/icons_580175.svg" alt="Y">
+        </div>
+        <div class="dot" data-layer="layer3">
+          <img src="https://pic.onlinewebfonts.com/thumbnails/icons_374986.svg" alt="Z">
+        </div>
+      </div>
+
+      <!-- Warstwy na poziomie panelu -->
+      <div class="layer layer1"><div id="variation_layer1"></div>
+      </div>
+    </div>
   </div>
-</div>
-
-
-<div class="settings-overlay" id="settingsOverlay">
-  <div class="settings-panel">
-    <div class="settings-close-line"></div>
-    <div class="dot-container">
-      <div class="dot" data-letter="X"><img src="https://fontawesome.com/icons/inbox?f=utility-duo&s=semibold"></div>
-      <div class="dot" data-letter="Y">Y</div>
-      <div class="dot" data-letter="Z">Z</div>
-   </div>
-  </div>
-</div>
-
 
   <!-- Dock -->
   <div class="settings-dock">
@@ -67,8 +74,7 @@
     </div>
   </div>
 
-
-
   <script src="script.js"></script>
+
 </body>
 </html>
