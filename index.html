@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Luxury Search — Full Version</title>
+  <title>Luxury Search -- Full Version</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
   <div class="overlay" id="overlay">
     <div class="search-menu">
       <div class="search-bar">
-        <input id="searchInput" type="text" placeholder="Wpisz zapytanie...">
+        <input id="searchInput" type="text" placeholder="">
       </div>
       <div class="result" data-index="0"></div>
       <div class="result" data-index="1"></div>
@@ -24,23 +24,33 @@
     </div>
   </div>
 
-<div id="searchResults" class="results-page" style="display:none;">
-  <h2 class="results-title">Wyniki dla: <span id="queryTitle"></span></h2>
-  <div class="results-container">
-    <div class="results-grid"></div>
-  </div>
-</div>
 
-
-<div class="results-root" style="display:none;">
+  <div class="results-root" style="display:none;">
   <div class="results-header">
     <h2 id="queryTitle"></h2>
   </div>
   <div class="results-container">
     <div class="results-grid"></div>
-    <div class="loading-indicator">Ładowanie...</div>
+  </div>
+
+  <!-- Trigger po lewej -->
+  <div class="scroll-trigger">
+    <div class="trigger-dot"></div>
   </div>
 </div>
+
+
+<div class="settings-overlay" id="settingsOverlay">
+  <div class="settings-panel">
+    <div class="settings-close-line"></div>
+    <div class="dot-container">
+      <div class="dot" data-letter="X">X</div>
+      <div class="dot" data-letter="Y">Y</div>
+      <div class="dot" data-letter="Z">Z</div>
+   </div>
+  </div>
+</div>
+
 
   <!-- Dock -->
   <div class="settings-dock">
@@ -50,10 +60,12 @@
     <button class="settings-button" id="dockBtn">⛶</button>
     <div class="dock-menu" id="dockMenu">
       <div class="menu-item" id="home-btn">⌂</div>
-      <div class="menu-item">֎</div>
+      <div class="menu-item" id="settings-btn">֎</div>
       <div class="menu-item">➤</div>
     </div>
   </div>
+
+
 
   <script src="script.js"></script>
 </body>
