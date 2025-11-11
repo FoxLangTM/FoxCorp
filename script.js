@@ -1,4 +1,4 @@
-// ======= Global setup =======
+
 const btn = document.getElementById("searchBtn");
 const overlay = document.getElementById("overlay");
 const input = document.getElementById("searchInput");
@@ -16,7 +16,7 @@ let historyStack = [];
 let historyIndex = -1;
 let shownLinks = new Set();
 
-// ======= Language detection =======
+
 function detectLang() {
   const sysLang = navigator.languages?.[0] || navigator.language || "pl";
   const code = sysLang.split("-")[0].toLowerCase();
@@ -349,7 +349,12 @@ document.addEventListener("touchend", cancelCloseHold);
 
 
 const panel = document.querySelector('.settings-panel');
-const dots = panel.querySelectorAll('.dot');
+const dots = document.querySelectorAll('.dot'); // zakładam, że tak się nazywają twoje przyciski
+dots.forEach((dot, i) => {
+  dot.addEventListener('click', () => {
+    updateCategory(i); // pokaż odpowiedni layer
+  });
+});
 const layers = panel.querySelectorAll('.layer');
 
 dots.forEach(dot => {
@@ -372,6 +377,86 @@ dots.forEach(dot => {
 
 
 
+const mainBtn = document.getElementById('variation_1btn');
+
+mainBtn.addEventListener('click', () => {
+  const layer = document.getElementById('variation_layer1');
+layer.parentElement.classList.add('active'); // włącza opacity i pointer-event
+  // Sprawdź, czy już istnieje linia i variations
+  
+  if (!layer.querySelector('.line')) {
+    // Tworzymy linię
+    const line = document.createElement('div');
+    line.className = 'line';
+    layer.appendChild(line);
+
+    // Tworzymy kilka przełączników
+    const variations = [
+      { label: 'Opcja 1' },
+      { label: 'Opcja 2' },
+      { label: 'Opcja 3' }
+    ];
+
+    variations.forEach(v => {
+      const variation = document.createElement('div');
+      variation.className = 'variation';
+
+      const dot = document.createElement('div');
+      dot.className = 'variation-dot';
+
+      const label = document.createElement('span');
+      label.className = 'variation-label';
+      label.textContent = v.label;
+
+      variation.appendChild(dot);
+      variation.appendChild(label);
+
+      // Kliknięcie na przełącznik
+      variation.addEventListener('click', () => {
+        // reset wszystkich
+        layer.querySelectorAll('.variation-dot').forEach(d => d.classList.remove('active'));
+        dot.classList.add('active');
+      });
+
+      layer.appendChild(variation);
+    });
+  }
+});
+
+
+const binaryToggle = document.getElementById('toggle1');
+const leftLabel = binaryToggle.querySelector('.toggle-label.left');
+const rightLabel = binaryToggle.querySelector('.toggle-label.right');
+
+binaryToggle.addEventListener('click', () => {
+  const isLeftActive = leftLabel.classList.contains('active');
+  
+  if(isLeftActive){
+    leftLabel.classList.remove('active');
+    rightLabel.classList.add('active');
+    binaryToggle.classList.add('active');
+  } else {
+    leftLabel.classList.add('active');
+    rightLabel.classList.remove('active');
+    binaryToggle.classList.remove('active');
+  }
+});
+
+
+
+const toggle = document.querySelector('.toggle-knob');
+const settingsToggle = document.querySelector('.settings-toggle');
+
+toggle?.addEventListener('click', () => {
+  toggle.classList.toggle('active');
+});
+
+function updateCategory(index) {
+  // logika zmiany kategorii
+  if (settingsToggle) {
+    settingsToggle.style.display = index === 0 ? 'flex' : 'none';
+  }
+}
 
 // ======= Assistant (full) =======
 function createAssistantPanel(){
@@ -437,34 +522,100 @@ document.addEventListener("DOMContentLoaded", () => {
   setupTrigger();
 });
 
-function setupTrigger() {
-  const trigger = document.querySelector(".scroll-trigger");
-  const overlay = document.getElementById("overlay");
-  const searchMenu = document.querySelector(".search-menu");
-  let holdTimer = null;
-  const HOLD_TIME = 500; // pół sekundy
+function createPerfControl(dotId) {
+  let level = 1;
+  const dot = document.getElementById(dotId);
+  const line = dot?.parentElement;
+  let startX = 0;
 
-  if (!trigger) return;
+  // Canvas do samplingu gradientu (czerwony 0%, złoty 50%, zielony 100%)
+  const canvas = document.createElement('canvas');
+  canvas.width = line.offsetWidth;
+  canvas.height = 1;
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
+  grad.addColorStop(0, '#ff3333');
+  grad.addColorStop(0.5, '#ffd700');
+  grad.addColorStop(1, '#2BE501');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, canvas.width, 1);
 
-  function startHold() {
-    if (loading) return;
-    trigger.classList.add("active");
-
-    holdTimer = setTimeout(async () => {
-      await showNextResults();
-      trigger.classList.remove("active");
-    }, HOLD_TIME);
+  function getColorAt(percent) {
+    const x = Math.floor((percent / 100) * (canvas.width - 1));
+    const [r, g, b] = ctx.getImageData(x, 0, 1, 1).data;
+    return `rgb(${r}, ${g}, ${b})`;
   }
 
-  function cancelHold() {
-    clearTimeout(holdTimer);
-    trigger.classList.remove("active");
+  function darkenColor(color, factor = 0.7) {
+    const [_, r, g, b] = color.match(/rgb\((\d+), (\d+), (\d+)\)/);
+    return `rgba(${Math.floor(r * factor)}, ${Math.floor(g * factor)}, ${Math.floor(b * factor)}, 0.8)`;
   }
 
-  trigger.addEventListener("mousedown", startHold);
-  trigger.addEventListener("touchstart", startHold);
-  document.addEventListener("mouseup", cancelHold);
-  document.addEventListener("touchend", cancelHold);
+  function startDrag(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    startX = e.touches ? e.touches[0].clientX : e.clientX;
+    document.addEventListener("mousemove", onDrag);
+    document.addEventListener("mouseup", stopDrag);
+    document.addEventListener("touchmove", onDrag, { passive: false });
+    document.addEventListener("touchend", stopDrag);
+  }
+
+  function onDrag(e) {
+    if (e.touches) e.preventDefault();
+    e.stopPropagation();
+    const rect = line.getBoundingClientRect();
+    const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+    let percent = ((currentX - rect.left) / rect.width) * 100;
+    percent = Math.max(0, Math.min(100, percent));
+
+    // Snap do 0%, 50%, 100%
+    if (percent < 25) percent = 0;
+    else if (percent > 25 && percent < 75) percent = 50;
+    else percent = 100;
+
+    dot.style.left = percent + "%";
+
+    // Dynamiczny kolor dot i shadow
+    const posColor = getColorAt(percent);
+    dot.style.background = posColor; // Kolor dot = kolor linii
+    const darkShadow = darkenColor(posColor);
+    dot.style.boxShadow = `0 2px 30px ${darkShadow}, 0 0 15px rgba(0,170,255,0.5)`; // Ciemniejszy shadow + neon halo
+
+    let newLevel = 1;
+    if (percent > 66) newLevel = 3;
+    else if (percent > 33) newLevel = 2;
+
+    if (newLevel !== level) {
+      level = newLevel;
+      updateMode();
+    }
+  }
+
+  function stopDrag() {
+    document.removeEventListener("mousemove", onDrag);
+    document.removeEventListener("mouseup", stopDrag);
+    document.removeEventListener("touchmove", onDrag);
+    document.removeEventListener("touchend", stopDrag);
+  }
+
+  function updateMode() {
+    const colors = {
+      1: "linear-gradient(90deg, #ff3333, #ff5555)",
+      2: "linear-gradient(90deg, #ffd700, #ffdd33)",
+      3: "linear-gradient(90deg, #33ff66, #66ffaa)"
+    };
+    line.style.background = colors[level];
+  }
+
+  dot?.addEventListener("mousedown", startDrag);
+  dot?.addEventListener("touchstart", startDrag, { passive: false });
+
+  return {
+    getValue: () => level,
+    setValue: (v) => { level = v; updateMode(); }
+  };
+
 
   // --- Zamykaj search bar po kliknięciu poza nim ---
   document.addEventListener("click", (e) => {
@@ -539,4 +690,37 @@ document.addEventListener("click", (e) => {
       dockMenu.classList.remove("show");
     }
   }
+})
+
+
+
+const perfRange = document.getElementById('perfRange3');
+
+perfRange?.addEventListener('input', (e) => {
+  let value = parseInt(e.target.value);
+  // Natychmiastowy snap do 0%, 50%, 100% dla precyzji, bez animacji
+  if (value < 25) value = 0;
+  else if (value > 25 && value < 75) value = 50;
+  else value = 100;
+  e.target.value = value;
+
+  // Update gradient/mode
+  const colors = {
+    0: "linear-gradient(90deg, #ff3333, #ff5555)",
+    50: "linear-gradient(90deg, #ffaa33, #ffdd33)",
+    100: "linear-gradient(90deg, #33ff66, #66ffaa)"
+  };
+  e.target.style.background = colors[value] || colors[0];
 });
+
+  
+
+// --- Tworzenie trzech kontrolerów ---
+const wydajność3 = createPerfControl("perfDot3");
+
+// --- Pokazywanie odpowiedniego layera przy zmianie kategorii ---
+function updateCategory(index) {
+  document.querySelectorAll(".performance-control").forEach(el => el.style.display = "none");
+  const layer = document.getElementById(`variation_layer${index + 1}`);
+  if (layer) layer.style.display = "flex";
+}
