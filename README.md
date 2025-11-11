@@ -2,7 +2,7 @@
 
 
 <img 
-  src="https://logowik.com/content/uploads/images/netlify-icon5435.logowik.com.webp" 
+  src="https://pixabay.com/photos/foxlang-foxcorp-foxlang-9951183/" 
   alt="Netlify Logo" 
   width="100" 
   align="left" 
