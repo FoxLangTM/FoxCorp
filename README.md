@@ -14,18 +14,18 @@ https://foxcorp.netlify.app/
 © FoxCorp ?.07.2025 All Right Reserved
 
 <br>
+<br>W razie pomocy, proszę zgłaszać wiadomości pod ten adres:
+<br>foxlang.team@gmail.com
 <br>
-|
-|
-|
-|
-|
-|
-|
-|
-|
-|
-
+<br>Zgłaszać błędy i prośby o pomoc.
+<br>#Nie zgłaszać błędów z:
+<br>• Urządzeniem,
+<br>• Skarg,
+<br>• Pomocy,
+<br>• Prośby o dodanie danej rzeczy
+<br>
+<br>
+<br>
 Uwagi od właściciela:
 
 
