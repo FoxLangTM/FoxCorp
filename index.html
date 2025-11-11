@@ -1,81 +1,79 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Luxury Search -- Full Version</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-</head>
-<body>
+<!DOCTYPE html>  <html lang="pl">  
+<head>  
+  <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <title>Luxury Search -- Full Version</title>  
+  <link rel="stylesheet" href="style.css">  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />  
+</head>  
+<body>    <!-- Search button -->    <div class="search-button" id="searchBtn">⌕</div>    <!-- Overlay -->    <div class="overlay" id="overlay">  
+    <div class="search-menu">  
+      <div class="search-bar">  
+        <input id="searchInput" type="text" placeholder="">  
+      </div>  
+      <div class="result" data-index="0"></div>  
+      <div class="result" data-index="1"></div>  
+      <div class="result" data-index="2"></div>  
+      <div class="result" data-index="3"></div>  
+    </div>  
+  </div>    <div class="results-root" style="display:none;">  
+    <div class="results-header">  
+      <h2 id="queryTitle"></h2>  
+    </div>  
+    <div class="results-container">  
+      <div class="results-grid"></div>  
+    </div>  <!-- Trigger po lewej -->  
+<div class="scroll-trigger">  
+  <div class="trigger-dot"></div>  
+</div>
 
-  <!-- Search button -->
-  <div class="search-button" id="searchBtn">⌕</div>
+  </div>    <div class="settings-overlay" id="settingsOverlay">  
+    <div class="settings-panel">  
+      <div class="settings-close-line"></div>  <div class="dot-container">  
+    <div class="dot" data-layer="layer1">  
+      <img src="https://pic.onlinewebfonts.com/thumbnails/icons_154090.svg" alt="X">  
+    </div>  
+    <div class="dot" data-layer="layer2">  
+      <img src="https://pic.onlinewebfonts.com/thumbnails/icons_580175.svg" alt="Y">  
+    </div>  
+    <div class="dot" data-layer="layer3">  
+      <img src="https://pic.onlinewebfonts.com/thumbnails/icons_374986.svg" alt="Z">  
+    </div>  
+  </div>  
+    
+       <div class="settings-toggle">
 
-  <!-- Overlay -->
-  <div class="overlay" id="overlay">
-    <div class="search-menu">
-      <div class="search-bar">
-        <input id="searchInput" type="text" placeholder="">
-      </div>
-      <div class="result" data-index="0"></div>
-      <div class="result" data-index="1"></div>
-      <div class="result" data-index="2"></div>
-      <div class="result" data-index="3"></div>
-    </div>
+  <div class="toggle-knob"></div>  
+  <span class="toggle-label">Tryb eksperymentalny</span>  
+
+</div>  <!-- LAYER 3 -->  <div id="variation_layer3" class="performance-control">
+  <div class="performance-label">\Wydajność ∆\</div>
+  <div class="performance-range-wrapper">
+    <input type="range" id="perfRange3" min="0" max="100" value="0" step="50">
   </div>
-
-  <div class="results-root" style="display:none;">
-    <div class="results-header">
-      <h2 id="queryTitle"></h2>
-    </div>
-    <div class="results-container">
-      <div class="results-grid"></div>
-    </div>
-
-    <!-- Trigger po lewej -->
-    <div class="scroll-trigger">
-      <div class="trigger-dot"></div>
-    </div>
+  <div class="performance-scale">
+    <span>Low End</span><span>Half End</span><span>Full End</span>
   </div>
-
-  <div class="settings-overlay" id="settingsOverlay">
-    <div class="settings-panel">
-      <div class="settings-close-line"></div>
-
-      <div class="dot-container">
-        <div class="dot" data-layer="layer1">
-          <img src="https://pic.onlinewebfonts.com/thumbnails/icons_154090.svg" alt="X">
-        </div>
-        <div class="dot" data-layer="layer2">
-          <img src="https://pic.onlinewebfonts.com/thumbnails/icons_580175.svg" alt="Y">
-        </div>
-        <div class="dot" data-layer="layer3">
-          <img src="https://pic.onlinewebfonts.com/thumbnails/icons_374986.svg" alt="Z">
-        </div>
-      </div>
-
-      <!-- Warstwy na poziomie panelu -->
-      <div class="layer layer1"><div id="variation_layer1"></div></div>
-      <div class="layer layer2"><div id="variation_layer2"></div></div>
-      <div class="layer layer3"><div id="variation_layer3"></div></div>
-    </div>
+  <div class="performance-emojis">
+    <span>💢</span><span>🔆</span><span>✨</span>
   </div>
-
-  <!-- Dock -->
-  <div class="settings-dock">
-    <input type="text" class="settings-field" value="⚙︎" readonly>
-    <button class="settings-add-card">+</button>
-    <button class="settings-cards">❖</button>
-    <button class="settings-button" id="dockBtn">⛶</button>
-    <div class="dock-menu" id="dockMenu">
-      <div class="menu-item" id="home-btn">⌂</div>
-      <div class="menu-item" id="settings-btn">֎</div>
-      <div class="menu-item">➤</div>
-    </div>
+</div>  
+    </div>  
   </div>
-
-  <script src="script.js"></script>
-
-</body>
+  
+      <!-- Dock -->    
+      <div class="settings-dock">  
+    <input type="text" class="settings-field" value="⚙︎" readonly>  
+    <button class="settings-add-card">+</button>  
+    <button class="settings-cards">❖</button>  
+    <button class="settings-button" id="dockBtn">⛶</button>  
+    <div class="dock-menu" id="dockMenu">  
+      <div class="menu-item" id="home-btn">⌂</div>  
+      <div class="menu-item" id="settings-btn">֎</div>  
+      <div class="menu-item">➤</div>  
+    </div>  
+  </div>
+  
+      <script src="script.js"></script>
+        </body>  
 </html>
