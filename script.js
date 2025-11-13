@@ -1,4 +1,3 @@
-
 const btn = document.getElementById("searchBtn");
 const overlay = document.getElementById("overlay");
 const input = document.getElementById("searchInput");
@@ -232,7 +231,7 @@ function setupTrigger() {
 document.addEventListener("DOMContentLoaded", setupTrigger);
 
 
-  
+
 
 // ======= Suggestions =======
 async function fetchSuggestions(q){
@@ -383,7 +382,7 @@ mainBtn.addEventListener('click', () => {
   const layer = document.getElementById('variation_layer1');
 layer.parentElement.classList.add('active'); // włącza opacity i pointer-event
   // Sprawdź, czy już istnieje linia i variations
-  
+
   if (!layer.querySelector('.line')) {
     // Tworzymy linię
     const line = document.createElement('div');
@@ -430,7 +429,7 @@ const rightLabel = binaryToggle.querySelector('.toggle-label.right');
 
 binaryToggle.addEventListener('click', () => {
   const isLeftActive = leftLabel.classList.contains('active');
-  
+
   if(isLeftActive){
     leftLabel.classList.remove('active');
     rightLabel.classList.add('active');
@@ -561,7 +560,7 @@ function createPerfControl(dotId) {
     document.addEventListener("touchend", stopDrag);
   }
 
-  function onDrag(e) {
+    function onDrag(e) {
     if (e.touches) e.preventDefault();
     e.stopPropagation();
     const rect = line.getBoundingClientRect();
@@ -694,17 +693,129 @@ document.addEventListener("click", (e) => {
 
 
 
+function applyOptimizations(level) {
+  const body = document.body;
+  body.classList.remove('max-power', 'balanced', 'optimized'); // Czyszczenie klas
+
+  if (level == 0) { // Low end: max moc, daje wszystko
+    body.classList.add('max-power');
+    // CSS dla .max-power: transform: scale(1); filter: none; /* Pełne animacje plus neon-metal gradient */
+    // Plus kreatywny add-on: init webGL neon-metal background dla dostojnego efektu
+    initWebGLNeonBackground();
+    // Brak optymalizacji – pełna moc
+    body.style.overflow = ''; // Reset rozciągnięcia
+  } else if (level == 50) { // Half end: zrównoważona, średnia
+    body.classList.add('balanced');
+    // CSS dla .balanced: transform: scale(0.95); filter: grayscale(0.1); /* Lekka równowaga */
+    body.style.overflow = ''; // Reset
+  } else { // 100 full end: optymalizacja, oszczędności
+    body.classList.add('optimized');
+    body.style.animation = 'none'; // Bezpośrednia blokada animacji dla body
+    // CSS dla .optimized: transform: scale(0.3); filter: grayscale(0.5) blur(1px); transition: none; /* Dodatkowa blokada, mocniejsze zmniejszenie pikseli */
+    // Skracanie nie używanych skryptów: clear non-essential timeouts/intervals
+    if (debounceTimer) clearTimeout(debounceTimer); // Przykładowo, skracanie debounce
+    // Opcjonalnie: if (someAnimInterval) clearInterval(someAnimInterval); // Dodaj dla swoich loopów
+    // Symulacja zmiany res: scale dla "mniej pikseli" (jak 980x520) + overflow hidden dla rozciągnięcia
+    body.style.overflow = 'hidden';
+  }
+}
+
+function initWebGLNeonBackground() {
+  // Kreatywny add-on: webGL canvas z metaliczno-neonowym gradientem (srebrno-błękitny puls z ciemniejszym halo)
+  const canvas = document.createElement('canvas');
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.zIndex = '-1';
+  canvas.style.pointerEvents = 'none'; // Nie blokuje interakcji
+  document.body.appendChild(canvas);
+
+  const gl = canvas.getContext('webgl');
+  if (!gl) return; // Fallback if no webGL
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const vsSource = `
+    attribute vec4 aPosition;
+    void main() {
+      gl_Position = aPosition;
+    }
+  `;
+  const fsSource = `
+    precision mediump float;
+    uniform vec2 uResolution;
+    uniform float uTime;
+    void main() {
+      vec2 uv = gl_FragCoord.xy / uResolution;
+      vec3 color = mix(vec3(0.66,0.66,0.66), vec3(0.0,0.66,1.0), uv.x + sin(uTime * 0.5) * 0.1); // Srebrno-błękitny neon puls
+      color *= 0.8 + 0.2 * sin(uv.y * 10.0 + uTime); // Dostojny metaliczny wzór
+      vec3 darkHalo = color * 0.7; // Ciemniejszy dla głębi halo
+      gl_FragColor = vec4(mix(color, darkHalo, 0.3), 1.0); // Mieszanka z ciemniejszym halo
+    }
+  `;
+
+  const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+  gl.useProgram(shaderProgram);
+
+  const positionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  const positions = [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0];
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+  const positionLocation = gl.getAttribLocation(shaderProgram, 'aPosition');
+  gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(positionLocation);
+
+  const resolutionLocation = gl.getUniformLocation(shaderProgram, 'uResolution');
+  const timeLocation = gl.getUniformLocation(shaderProgram, 'uTime');
+
+  function render() {
+    gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+    gl.uniform1f(timeLocation, performance.now() / 1000);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render();
+
+  function initShaderProgram(gl, vsSource, fsSource) {
+    const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
+    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
+    const shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+    return shaderProgram;
+  }
+
+  function loadShader(gl, type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    return shader;
+  }
+}
+
 const perfRange = document.getElementById('perfRange3');
 
-perfRange?.addEventListener('input', (e) => {
-  let value = parseInt(e.target.value);
-  // Natychmiastowy snap do 0%, 50%, 100% dla precyzji, bez animacji
-  if (value < 25) value = 0;
-  else if (value > 25 && value < 75) value = 50;
-  else value = 100;
-  e.target.value = value;
+// Na load, odczytaj z localStorage
+let savedValue = localStorage.getItem('perfValue') || '0'; // Zapisujemy value suwaka dla spójności
+perfRange.value = savedValue;
+applyOptimizations(savedValue);
 
-  // Update gradient/mode
+// Na change, zapisz i zastosuj
+perfRange?.addEventListener('change', (e) => {
+  let value = parseInt(e.target.value);
+  if (value < 25) value = 0; // Low end: max moc
+  else if (value > 25 && value < 75) value = 50; // Half: zrównoważona
+  else value = 100; // Full end: optymalizacja oszczędna
+  e.target.value = value;
+  localStorage.setItem('perfValue', value); // Zapisz value, by level nie resetował się
+  applyOptimizations(value);
+
+  // Update gradient (dostosowany do low/half/full)
   const colors = {
     0: "linear-gradient(90deg, #ff3333, #ff5555)",
     50: "linear-gradient(90deg, #ffaa33, #ffdd33)",
@@ -713,7 +824,6 @@ perfRange?.addEventListener('input', (e) => {
   e.target.style.background = colors[value] || colors[0];
 });
 
-  
 
 // --- Tworzenie trzech kontrolerów ---
 const wydajność3 = createPerfControl("perfDot3");
