@@ -1,0 +1,24 @@
+{
+  "name": "FoxCorp",
+  "short_name": "FoxCorp",
+  "description": "FoxCorp | A browser with exceptional taste, focused on performance, design, and features.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#2e2e2e",
+  "theme_color": "#ff6600",
+  "icons": [
+    {
+      "src": "/FoxCorp.webp",
+      "sizes": "180x180",
+      "type": "image/webp"
+    },
+    {
+      "src": "/FoxCorp.webp",
+      "sizes": "512x512",
+      "type": "image/webp"
+    }
+  ],
+  "categories": ["productivity", "utilities", "browser"],
+  "prefer_related_applications": false
+}
