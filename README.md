@@ -2,14 +2,14 @@
 
 
 <img 
-  src="FoxCorp.webp" 
+  src="images/FoxCorp.webp" 
   alt="Netlify Logo" 
   width="100" 
   align="left" 
   style="border-radius: 20px; margin-right: 10px;"
 />
 
-https://foxcorp.netlify.app/
+https://foxcorp.pages.dev/
 
 ® FoxCorp 11.07.2025 All Right Reserved
 
@@ -47,4 +47,4 @@ LuxurySearchBarConcept(tittle: FoxCorp) został stworzony w Polsce.
     | AI |
 
 
-Początki FoxCorp, zaczęły się w Polsce, rokiem 2025/07/. 
+Początki FoxCorp, zaczęły się w Polsce, rokiem 2025/07/11. 
