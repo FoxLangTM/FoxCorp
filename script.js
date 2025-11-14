@@ -568,11 +568,6 @@ function createPerfControl(dotId) {
     let percent = ((currentX - rect.left) / rect.width) * 100;
     percent = Math.max(0, Math.min(100, percent));
 
-    // Snap do 0%, 50%, 100%
-    if (percent < 25) percent = 0;
-    else if (percent > 25 && percent < 75) percent = 50;
-    else percent = 100;
-
     dot.style.left = percent + "%";
 
     // Dynamiczny kolor dot i shadow
@@ -799,6 +794,7 @@ function initWebGLNeonBackground() {
 }
 
 const perfRange = document.getElementById('perfRange3');
+const perfWrapper = document.querySelector('.performance-range-wrapper');
 
 // Wrapper dla IndexedDB (z fallback na sessionStorage)
 const DB_NAME = 'FoxCorpDB';
@@ -846,7 +842,6 @@ async function setValue(value) {
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
       transaction.oncomplete = () => {
-        // Opcjonalnie: Żądaj persistent storage
         if (navigator.storage && navigator.storage.persist) {
           navigator.storage.persist().then(granted => {
             if (granted) console.log('Persistent storage granted');
@@ -860,36 +855,50 @@ async function setValue(value) {
   }
 }
 
-// Funkcja snapująca wartość (bez zmian)
-function snapValue(value) {
-  let snapped = parseInt(value);
-  if (snapped < 25) snapped = 0;
-  else if (snapped > 25 && snapped < 75) snapped = 50;
-  else snapped = 100;
-  return snapped;
+// Funkcja do obliczania procentowej pozycji dot'a (thumb) względem wrappera linii
+function getDotPercent() {
+  if (!perfRange || !perfWrapper) return 0;
+  const rect = perfWrapper.getBoundingClientRect();
+  const thumbRect = perfRange.getBoundingClientRect(); // Przybliżenie pozycji thumb'a
+  const percent = ((thumbRect.left - rect.left + thumbRect.width / 2) / rect.width) * 100;
+  return Math.max(0, Math.min(100, percent));
 }
 
-// Na load: Odczytaj z IndexedDB
+// Funkcja snapująca na podstawie pozycji (dla apply)
+function snapValue(percent) {
+  if (percent < 25) return 0;
+  else if (percent <= 75) return 50;
+  else return 100;
+}
+
+// Na load: Odczytaj, ustaw value na raw, apply na snapowanej pozycji
 (async () => {
   let savedValue = await getValue();
-  perfRange.value = savedValue;
-  applyOptimizations(snapValue(savedValue));
+  perfRange.value = savedValue; // Raw value dla pozycji
+  const percent = getDotPercent(); // Oblicz aktualną pozycję
+  applyOptimizations(snapValue(percent));
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().then(granted => {
+      if (granted) console.log('Persistent storage granted');
+    });
+  }
 })();
 
-// Na input: Zapis dynamiczny ze snapem
+// Na input: Zapis raw value, ale apply na bieżącej pozycji dot'a
 perfRange?.addEventListener('input', async (e) => {
-  const snapped = snapValue(e.target.value);
-  await setValue(snapped);
+  await setValue(e.target.value); // Zapisz raw
+  const percent = getDotPercent(); // Mierz pozycję dot'a
+  applyOptimizations(snapValue(percent)); // Apply tryb
 });
 
-// Na change: Finalny snap i apply
+// Na change: To samo, finalny zapis i apply
 perfRange?.addEventListener('change', async (e) => {
-  const snapped = snapValue(e.target.value);
-  e.target.value = snapped;
-  await setValue(snapped);
-  applyOptimizations(snapped);
+  await setValue(e.target.value);
+  const percent = getDotPercent();
+  applyOptimizations(snapValue(percent));
 
-  // Update gradient (bez zmian)
+  // Update gradient na podstawie snap
+  const snapped = snapValue(percent);
   const colors = {
     0: "linear-gradient(90deg, #ff3333, #ff5555)",
     50: "linear-gradient(90deg, #ffaa33, #ffdd33)",
@@ -898,16 +907,14 @@ perfRange?.addEventListener('change', async (e) => {
   e.target.style.background = colors[snapped] || colors[0];
 });
 
-// Automatyczny zapis na wyjście/minimize
+// Automatyczny zapis raw na wyjście
 window.addEventListener('beforeunload', async () => {
-  const currentValue = snapValue(perfRange.value);
-  await setValue(currentValue);
+  await setValue(perfRange.value);
 });
 
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === 'hidden') {
-    const currentValue = snapValue(perfRange.value);
-    await setValue(currentValue);
+    await setValue(perfRange.value);
   }
 });
 
