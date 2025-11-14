@@ -800,16 +800,14 @@ function initWebGLNeonBackground() {
 
 const perfRange = document.getElementById('perfRange3');
 
-// Na load, odczytaj z localStorage (fallback sessionStorage)
-let savedValue = localStorage.getItem('perfValue') || sessionStorage.getItem('perfValue') || '0'; // Podwójny fallback dla aplikacji
+// Na load, odczytaj z localStorage
+let savedValue = localStorage.getItem('perfValue') || '0'; // Zapisujemy value suwaka dla spójności
 perfRange.value = savedValue;
 applyOptimizations(savedValue);
 
-// Na input, zapisz dynamicznie podczas drag (w local i session dla niezawodności)
+// Na input, zapisz dynamicznie podczas drag
 perfRange?.addEventListener('input', (e) => {
-  const value = e.target.value;
-  localStorage.setItem('perfValue', value);
-  sessionStorage.setItem('perfValue', value); // Dodatkowe zapisywanie dla app lifecycle
+  localStorage.setItem('perfValue', e.target.value); // Zapisz pozycję podczas ruchu
 });
 
 // Na change, zapisz i zastosuj po release
@@ -819,8 +817,7 @@ perfRange?.addEventListener('change', (e) => {
   else if (value > 25 && value < 75) value = 50; // Half: zrównoważona
   else value = 100; // Full end: optymalizacja oszczędna
   e.target.value = value;
-  localStorage.setItem('perfValue', value);
-  sessionStorage.setItem('perfValue', value); // Zapisz finalną
+  localStorage.setItem('perfValue', value); // Zapisz finalną pozycję
   applyOptimizations(value);
 
   // Update gradient (dostosowany do low/half/full)
@@ -832,11 +829,6 @@ perfRange?.addEventListener('change', (e) => {
   e.target.style.background = colors[value] || colors[0];
 });
 
-// Dodatkowe zapisywanie na unload dla app exit
-window.addEventListener('unload', () => {
-  localStorage.setItem('perfValue', perfRange.value);
-  sessionStorage.setItem('perfValue', perfRange.value);
-});
 
 // --- Tworzenie trzech kontrolerów ---
 const wydajność3 = createPerfControl("perfDot3");
