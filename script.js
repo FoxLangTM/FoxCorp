@@ -808,6 +808,7 @@ applyOptimizations(savedValue);
 // Na input, zapisz dynamicznie podczas drag
 perfRange?.addEventListener('input', (e) => {
   localStorage.setItem('perfValue', e.target.value); // Zapisz pozycję podczas ruchu
+  applyOptimizations(e.target.value); // Opcjonalnie: apply podczas drag dla real-time
 });
 
 // Na change, zapisz i zastosuj po release
