@@ -560,7 +560,7 @@ function createPerfControl(dotId) {
     document.addEventListener("touchend", stopDrag);
   }
 
-    function onDrag(e) {
+   function onDrag(e) {
     if (e.touches) e.preventDefault();
     e.stopPropagation();
     const rect = line.getBoundingClientRect();
@@ -800,33 +800,76 @@ function initWebGLNeonBackground() {
 
 const perfRange = document.getElementById('perfRange3');
 
-// Na load, odczytaj z localStorage
-let savedValue = localStorage.getItem('perfValue') || '0'; // Zapisujemy value suwaka dla spójności
-perfRange.value = savedValue;
-applyOptimizations(savedValue);
+// Funkcja snapująca wartość (wyodrębniona dla czystości)
+function snapValue(value) {
+  let snapped = parseInt(value);
+  if (snapped < 25) snapped = 0;
+  else if (snapped > 25 && snapped < 75) snapped = 50;
+  else snapped = 100;
+  return snapped;
+}
 
-// Na input, zapisz dynamicznie podczas drag
+// Na load, odczytaj z localStorage (z fallbackiem na sessionStorage)
+let savedValue;
+try {
+  savedValue = localStorage.getItem('perfValue') || sessionStorage.getItem('perfValue') || '0';
+} catch (err) {
+  console.warn('Błąd localStorage:', err); // Szczery log dla debugu
+  savedValue = '0'; // Fallback na default
+}
+perfRange.value = savedValue;
+applyOptimizations(snapValue(savedValue)); // Snap na starcie dla spójności
+
+// Na input: zapis dynamiczny ze snapem (unikamy śmieciowych wartości)
 perfRange?.addEventListener('input', (e) => {
-  localStorage.setItem('perfValue', e.target.value); // Zapisz pozycję podczas ruchu
+  const snapped = snapValue(e.target.value);
+  try {
+    localStorage.setItem('perfValue', snapped);
+    sessionStorage.setItem('perfValue', snapped); // Backup
+  } catch (err) {
+    console.warn('Nie udało się zapisać w storage:', err);
+  }
 });
 
-// Na change, zapisz i zastosuj po release
+// Na change: finalny snap i apply (jak miałeś)
 perfRange?.addEventListener('change', (e) => {
-  let value = parseInt(e.target.value);
-  if (value < 25) value = 0; // Low end: max moc
-  else if (value > 25 && value < 75) value = 50; // Half: zrównoważona
-  else value = 100; // Full end: optymalizacja oszczędna
-  e.target.value = value;
-  localStorage.setItem('perfValue', value); // Zapisz finalną pozycję
-  applyOptimizations(value);
+  const snapped = snapValue(e.target.value);
+  e.target.value = snapped;
+  try {
+    localStorage.setItem('perfValue', snapped);
+    sessionStorage.setItem('perfValue', snapped);
+  } catch (err) {
+    console.warn('Nie udało się zapisać w storage:', err);
+  }
+  applyOptimizations(snapped);
 
-  // Update gradient (dostosowany do low/half/full)
+  // Update gradient (jak miałeś, bez zmian)
   const colors = {
     0: "linear-gradient(90deg, #ff3333, #ff5555)",
     50: "linear-gradient(90deg, #ffaa33, #ffdd33)",
     100: "linear-gradient(90deg, #33ff66, #66ffaa)"
   };
-  e.target.style.background = colors[value] || colors[0];
+  e.target.style.background = colors[snapped] || colors[0];
+});
+
+// Automatyczny zapis na wyjście/minimize (dla mobile/PWA)
+window.addEventListener('beforeunload', () => {
+  const currentValue = snapValue(perfRange.value);
+  try {
+    localStorage.setItem('perfValue', currentValue);
+    sessionStorage.setItem('perfValue', currentValue);
+  } catch {} // Cichy, bo unload może być szybki
+});
+
+// Dla visibility change (np. app w tle na mobile)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    const currentValue = snapValue(perfRange.value);
+    try {
+      localStorage.setItem('perfValue', currentValue);
+      sessionStorage.setItem('perfValue', currentValue);
+    } catch {}
+  }
 });
 
 
