@@ -805,14 +805,19 @@ let savedValue = localStorage.getItem('perfValue') || '0'; // Zapisujemy value s
 perfRange.value = savedValue;
 applyOptimizations(savedValue);
 
-// Na change, zapisz i zastosuj
+// Na input, zapisz dynamicznie podczas drag
+perfRange?.addEventListener('input', (e) => {
+  localStorage.setItem('perfValue', e.target.value); // Zapisz pozycję podczas ruchu
+});
+
+// Na change, zapisz i zastosuj po release
 perfRange?.addEventListener('change', (e) => {
   let value = parseInt(e.target.value);
   if (value < 25) value = 0; // Low end: max moc
   else if (value > 25 && value < 75) value = 50; // Half: zrównoważona
   else value = 100; // Full end: optymalizacja oszczędna
   e.target.value = value;
-  localStorage.setItem('perfValue', value); // Zapisz value, by level nie resetował się
+  localStorage.setItem('perfValue', value); // Zapisz finalną pozycję
   applyOptimizations(value);
 
   // Update gradient (dostosowany do low/half/full)
