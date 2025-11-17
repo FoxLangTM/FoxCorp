@@ -928,3 +928,147 @@ function updateCategory(index) {
   const layer = document.getElementById(`variation_layer${index + 1}`);
   if (layer) layer.style.display = "flex";
 }
+
+
+
+
+// ==================== BROWSER VIEW – iframe wewnątrz FoxCorp ====================
+
+const browserView = document.createElement('div');
+browserView.className = 'browser-view';
+browserView.innerHTML = `
+  <div class="browser-nav">
+    <button id="browserBack">←</button>
+    <button id="browserForward">→</button>
+    <button id="browserRefresh">↻</button>
+    <button id="browserHome">⌂</button>
+    <div class="browser-url-bar" id="browserUrlBar">FoxCorp • Your own browser</div>
+  </div>
+  <iframe id="foxIframe" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals allow-downloads"></iframe>
+`;
+document.body.appendChild(browserView);
+
+// Styl dla nowego widoku (dodaj do style.css lub wklej w <style> w head)
+const browserStyle = document.createElement('style');
+browserStyle.textContent = `
+  .browser-view {
+    position: fixed;
+    inset: 0;
+    background: #111;
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+  }
+  .browser-view.show { display: flex; }
+
+  .browser-nav {
+    height: 50px;
+    background: linear-gradient(145deg, #1e1e1e, #0d0d0d);
+    border-bottom: 1px solid #00aaff;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    gap: 15px;
+    box-shadow: 0 4px 20px rgba(0,170,255,0.3);
+  }
+  .browser-nav button {
+    width: 40px; height: 40px;
+    background: linear-gradient(45deg, #a9a9a9, #00aaff);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0,170,255,0.6), inset 0 0 8px rgba(169,169,169,0.5);
+    transition: all 0.3s ease;
+  }
+  .browser-nav button:active {
+    transform: scale(0.9);
+    box-shadow: 0 0 25px rgba(0,170,255,1);
+  }
+  .browser-url-bar {
+    flex: 1;
+    color: #00eeff;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 0 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 0 8px rgba(0,238,255,0.7);
+  }
+  #foxIframe {
+    flex: 1;
+    border: none;
+    background: #fff;
+  }
+  @media (prefers-color-scheme: dark) {
+    #foxIframe { background: #000; }
+  }
+`;
+document.head.appendChild(browserStyle);
+
+// Elementy
+const iframe = document.getElementById('foxIframe');
+const urlBar = document.getElementById('browserUrlBar');
+let currentUrl = 'about:blank';
+
+// Funkcja otwierająca link w iframe
+function openInBrowser(url) {
+  if (!url || url === 'about:blank') return;
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = 'https://' + url;
+  }
+  currentUrl = url;
+  iframe.src = url;
+  urlBar.textContent = url;
+  browserView.classList.add('show');
+  history.pushState({ url }, '', '#view');
+}
+
+// Przechwytujemy wszystkie linki z wyników (zamiast target="_blank")
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a[href]');
+  if (link && link.getAttribute('target') === '_blank') {
+    e.preventDefault();
+    const href = link.getAttribute('href');
+    openInBrowser(href);
+  }
+});
+
+// Nawigacja
+document.getElementById('browserBack')?.addEventListener('click', () => {
+  history.back();
+});
+document.getElementById('browserForward')?.addEventListener('click', () => {
+  history.forward();
+});
+document.getElementById('browserRefresh')?.addEventListener('click', () => {
+  iframe.src = currentUrl;
+});
+document.getElementById('browserHome')?.addEventListener('click', () => {
+  browserView.classList.remove('show');
+  iframe.src = 'about:blank';
+  history.pushState(null, '', location.pathname);
+});
+
+// Obsługa wstecz / przód w aplikacji
+window.addEventListener('popstate', (e) => {
+  if (location.hash === '#view' && e.state?.url) {
+    browserView.classList.add('show');
+    iframe.src = e.state.url;
+    urlBar.textContent = e.state.url;
+    currentUrl = e.state.url;
+  } else {
+    browserView.classList.remove('show');
+    iframe.src = 'about:blank';
+  }
+});
+
+// Zamknij widok przeglądarki klikając poza (opcjonalnie – możesz wyłączyć)
+browserView.addEventListener('click', (e) => {
+  if (e.target === browserView) {
+    browserView.classList.remove('show');
+    history.back();
+  }
+});
