@@ -125,7 +125,9 @@ function buildCardHTML(r) {
         <p class="results-res-text">${escapeHtml(r.snippet)}</p>
         <img src="${escapeHtml(r.image)}" class="results-res-mini" loading="lazy"/>
       </div>
-      <span class="fake-link" data-url="${escapeHtml(r.link)}">${escapeHtml(r.displayLink)}</span>
+      <div class="fake-link" data-url="${escapeHtml(r.link)}">
+        ${escapeHtml(r.displayLink)}
+      </div>
     </div>
   `;
 }
@@ -931,54 +933,81 @@ function updateCategory(index) {
 
 
 
+
 // ================================================================
-// FOXCORP – NAKŁADKA IFRAME – DZIAŁA 100% BEZ ŻADNYCH <a>
+// FOXCORP – DZIAŁAJĄCA NAKŁADKA IFRAME – WERSJA NA 1000% DZIAŁAJĄCA
 // ================================================================
 
-const firefoxOverlay = document.createElement('div');
-firefoxOverlay.className = 'firefox-overlay';
-firefoxOverlay.innerHTML = `
-  <div class="firefox-header">
-    <button id="closeFirefoxOverlay">✕</button>
-    <div id="firefoxCurrentUrl">FoxCorp • Przeglądanie</div>
+// Tworzymy nakładkę
+const overlay = document.createElement('div');
+overlay.id = 'foxIframeOverlay';
+overlay.innerHTML = `
+  <div class="fox-header">
+    <button id="foxClose">✕</button>
+    <div id="foxUrlText">FoxCorp</div>
   </div>
-  <iframe id="firefoxIframe" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals allow-downloads"></iframe>
+  <iframe id="foxIframe" src="about:blank"></iframe>
 `;
-document.body.appendChild(firefoxOverlay);
+document.body.appendChild(overlay);
 
-const overlayCSS = document.createElement('style');
-overlayCSS.textContent = `
-  .firefox-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 99999; display: none; flex-direction: column; }
-  .firefox-overlay.active { display: flex; }
-  .firefox-header { height: 56px; background: linear-gradient(145deg, #1a1a1a, #0c0c1f); border-bottom: 3px solid #00aaff; display: flex; align-items: center; padding: 0 15px; gap: 15px; box-shadow: 0 6px 30px rgba(0,170,255,0.5); }
-  #closeFirefoxOverlay { width: 46px; height: 46px; background: linear-gradient(45deg, #ff3366, #ff5577); border: none; border-radius: 50%; color: white; font-size: 22px; box-shadow: 0 0 25px rgba(255,50,100,0.8); cursor: pointer; }
-  #firefoxCurrentUrl { color: #00eeff; font-size: 15px; font-weight: bold; text-shadow: 0 0 10px #00eeff; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  #firefoxIframe { flex: 1; border: none; background: white; }
+// Styl
+const css = document.createElement('style');
+css.textContent = `
+  #foxIframeOverlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: #000; z-index: 999999; display: none; flex-direction: column;
+    font-family: system-ui, sans-serif;
+  }
+  #foxIframeOverlay.active { display: flex; }
+  .fox-header {
+    height: 56px; background: linear-gradient(145deg, #111, #000);
+    border-bottom: 3px solid #00aaff; display: flex; align-items: center;
+    padding: 0 12px; gap: 12px; box-shadow: 0 6px 30px rgba(0,170,255,0.5);
+  }
+  #foxClose {
+    width: 48px; height: 48px; background: #ff3366; border: none; border-radius: 50%;
+    color: white; font-size: 24px; cursor: pointer;
+  }
+  #foxUrlText {
+    color: #00eeff; font-weight: bold; flex: 1; font-size: 15px;
+    text-shadow: 0 0 10px #00eeff; overflow: hidden; white-space: nowrap;
+  }
+  #foxIframe { flex: 1; border: none; }
+  .fake-link {
+    color: #00aaff; font-size: 14px; cursor: pointer; margin-top: 8px;
+    text-decoration: underline; display: block;
+  }
+  .fake-link:hover { color: #00eeff; text-shadow: 0 0 8px #00eeff; }
 `;
-document.head.appendChild(overlayCSS);
+document.head.appendChild(css);
 
-const iframe = document.getElementById('firefoxIframe');
-const urlDisplay = document.getElementById('firefoxCurrentUrl');
-
-// KLIKNIĘCIE W CAŁY WYNIK – DZIAŁA ZAWSZE
-document.addEventListener('click', e => {
+// Najważniejsze: kliknięcie w kartę
+document.addEventListener('click', function(e) {
+  // Kliknięcie w całą kartę wyniku
   const card = e.target.closest('.results-res-card');
   if (!card) return;
 
-  // Bierzemy URL z data-url w span.fake-link
-  const fakeLink = card.querySelector('.fake-link');
-  if (!fakeLink || !fakeLink.dataset.url) return;
+  // Szukamy elementu z data-url (nasz fake-link)
+  const urlEl = card.querySelector('[data-url]');
+  if (!urlEl) return;
 
-  let url = fakeLink.dataset.url.trim();
-  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  e.preventDefault();
+  e.stopPropagation(); // blokujemy wszystko inne
 
-  iframe.src = url;
-  urlDisplay.textContent = url;
-  firefoxOverlay.classList.add('active');
+  let url = urlEl.getAttribute('data-url');
+  if (!url) return;
+  if (!url.startsWith('http')) url = 'https://' + url;
+
+  // Otwieramy!
+  document.getElementById('foxIframe').src = url;
+  document.getElementById('foxUrlText').textContent = url;
+  document.getElementById('foxIframeOverlay').classList.add('active');
 });
 
 // Zamknij
-document.getElementById('closeFirefoxOverlay')?.addEventListener('click', () => {
-  firefoxOverlay.classList.remove('active');
-  setTimeout(() => iframe.src = 'about:blank', 300);
+document.getElementById('foxClose')?.addEventListener('click', () => {
+  document.getElementById('foxIframeOverlay').classList.remove('active');
+  setTimeout(() => {
+    document.getElementById('foxIframe').src = 'about:blank';
+  }, 400);
 });
