@@ -468,6 +468,11 @@ transition: transform 0.2s, box-shadow 0.2s;
 transform: translateY(-3px);
 box-shadow: 0 0 12px rgba(0,0,0,0.4);
 }
+
+.results-res-card {
+  transition: none; /* albo zostaw tylko hover */
+}
+
 .results-res-thumb {
 width: 120px;
 height: auto;
@@ -510,6 +515,19 @@ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width:100%;
 opacity: 0;
 transform: translateY(-20px);
 transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fake-link {
+  color: #00aaff;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-top: 8px;
+  display: inline-block;
+}
+.fake-link:hover {
+  color: #00eeff;
+  text-shadow: 0 0 8px #00eeff;
 }
 
 .assistant-section {
