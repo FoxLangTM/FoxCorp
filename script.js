@@ -931,100 +931,84 @@ function updateCategory(index) {
 
 
 
-// ====================================================================
-// FOXCORP FULL-SCREEN BROWSER – ŻADNEGO CHROME'A, TYLKO NASZA APLIKACJA
-// ====================================================================
+// ================================================================
+// FOXCORP – WŁASNA PRZEGLĄDARKA Z KLIKANIEM W CAŁY WYNIK
+// ================================================================
 
-;(() => {
-  const fullBrowser = document.createElement('div');
-  fullBrowser.className = 'fox-full-browser';
-  fullBrowser.innerHTML = `
-    <div class="fox-browser-header">
-      <button id="foxCloseBrowser">✕</button>
-      <button id="foxBrowserBack">←</button>
-      <button id="foxBrowserForward">→</button>
-      <button id="foxBrowserRefresh">↻</button>
-      <div class="fox-url-display" id="foxUrlDisplay">FoxCorp</div>
-    </div>
-    <iframe id="foxFullIframe" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals allow-downloads allow-top-navigation-by-user-activation"></iframe>
-  `;
-  document.body.appendChild(fullBrowser);
+const foxBar = document.createElement('div');
+foxBar.id = 'foxcorp-bar';
+foxBar.innerHTML = `
+  <button id="foxBack">←</button>
+  <button id="foxForward">→</button>
+  <button id="foxRefresh">↻</button>
+  <button id="foxHome">⌂ FoxCorp</button>
+  <div id="foxUrl">FoxCorp</div>
+`;
+document.body.appendChild(foxBar);
 
-  const style = document.createElement('style');
-  style.textContent = `
-    .fox-full-browser {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: #000; z-index: 99999; display: none; flex-direction: column;
+const barCSS = document.createElement('style');
+barCSS.textContent = `
+  #foxcorp-bar {
+    position: fixed; top: 0; left: 0; right: 0; height: 56px;
+    background: linear-gradient(145deg, #111, #000);
+    border-bottom: 3px solid #00aaff; display: flex; align-items: center;
+    padding: 0 12px; gap: 12px; z-index: 999999; box-shadow: 0 4px 30px rgba(0,170,255,0.6);
+  }
+  #foxcorp-bar button {
+    width: 46px; height: 46px; background: linear-gradient(45deg, #a9a9a9, #00aaff);
+    border: none; border-radius: 50%; color: white; font-size: 22px;
+    box-shadow: 0 0 20px #00aaff; cursor: pointer;
+  }
+  #foxcorp-bar button:active { transform: scale(0.9); }
+  #foxHome { background: linear-gradient(45deg, #00eeff, #0099cc); flex: 1; border-radius: 12px; font-weight: bold; }
+  #foxUrl { color: #00eeff; font-size: 14px; text-shadow: 0 0 10px #00eeff; flex: 2; overflow: hidden; white-space: nowrap; }
+`;
+document.head.appendChild(barCSS);
+
+// GŁÓWNA FUNKCJA: otwiera link w naszej przeglądarce
+function openInFoxCorp(url) {
+  if (!url || url.startsWith('javascript:')) return;
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+  history.pushState({ foxcorp: true }, '', url);
+  location.href = url;
+  document.getElementById('foxUrl').textContent = url;
+}
+
+// 1. Kliknięcie w CAŁY WYNIK (nie tylko link!)
+document.addEventListener('click', e => {
+  // Szukamy najbliższej karty wyniku
+  const card = e.target.closest('.results-res-card');
+  if (card) {
+    e.preventDefault();
+    // Znajdujemy link wewnątrz karty
+    const link = card.querySelector('a[href]');
+    if (link && link.href) {
+      openInFoxCorp(link.href);
     }
-    .fox-full-browser.active { display: flex; }
-    .fox-browser-header {
-      height: 56px; background: linear-gradient(145deg, #1a1a1a, #0f0f1f);
-      border-bottom: 2px solid #00aaff; display: flex; align-items: center;
-      padding: 0 12px; gap: 12px; box-shadow: 0 4px 30px rgba(0,170,255,0.4); flex-shrink: 0;
-    }
-    .fox-browser-header button {
-      width: 44px; height: 44px; background: linear-gradient(45deg, #a9a9a9, #00aaff);
-      border: none; border-radius: 50%; color: white; font-size: 20px;
-      cursor: pointer; box-shadow: 0 0 20px rgba(0,170,255,0.7);
-    }
-    .fox-browser-header button:active { transform: scale(0.88); }
-    #foxCloseBrowser { background: linear-gradient(45deg, #ff3366, #ff5577); }
-    .fox-url-display { flex: 1; color: #00eeff; font-size: 15px; text-shadow: 0 0 10px #00eeff;
-      overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding: 0 10px;
-    }
-    #foxFullIframe { flex: 1; border: none; }
-  `;
-  document.head.appendChild(style);
-
-  const iframe = document.getElementById('foxFullIframe');
-  const urlDisplay = document.getElementById('foxUrlDisplay');
-  let history = [];
-  let historyIndex = -1;
-
-  function openUrl(url) {
-    if (!url) return;
-    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-
-    iframe.src = url;
-    urlDisplay.textContent = url;
-    fullBrowser.classList.add('active');
-
-    history.push(url);
-    historyIndex = history.length - 1;
+    return;
   }
 
-  // Przechwytujemy wszystkie linki w aplikacji
-  document.addEventListener('click', e => {
-    const a = e.target.closest('a[href]');
-    if (a && a.getAttribute('href') && !a.getAttribute('href').startsWith('#') && !a.getAttribute('href').startsWith('javascript:')) {
-      e.preventDefault();
-      openUrl(a.getAttribute('href'));
-    }
-  });
+  // Opcjonalnie: jeśli ktoś kliknie bezpośrednio w link poza kartą
+  const directLink = e.target.closest('a[href]');
+  if (directLink && !directLink.closest('.results-res-card')) {
+    e.preventDefault();
+    openInFoxCorp(directLink.href);
+  }
+});
 
-  document.getElementById('foxCloseBrowser')?.addEventListener('click', () => {
-    fullBrowser.classList.remove('active');
-    iframe.src = 'about:blank';
-  });
+// Przyciski paska
+document.getElementById('foxBack')?.addEventListener('click', () => history.back());
+document.getElementById('foxForward')?.addEventListener('click', () => history.forward());
+document.getElementById('foxRefresh')?.addEventListener('click', () => location.reload());
+document.getElementById('foxHome')?.addEventListener('click', () => {
+  location.href = location.origin + location.pathname;
+});
 
-  document.getElementById('foxBrowserBack')?.addEventListener('click', () => {
-    if (historyIndex > 0) {
-      historyIndex--;
-      iframe.src = history[historyIndex];
-      urlDisplay.textContent = history[historyIndex];
-    }
-  });
-
-  document.getElementById('foxBrowserForward')?.addEventListener('click', () => {
-    if (historyIndex < history.length - 1) {
-      historyIndex++;
-      iframe.src = history[historyIndex];
-      urlDisplay.textContent = history[historyIndex];
-    }
-  });
-
-  document.getElementById('foxBrowserRefresh')?.addEventListener('click', () => {
-    iframe.src = iframe.src;
-  });
-
-})(); // <--- Iny IIFE, zero kolizji z resztą kodu
+// Aktualizacja URL w pasku po każdym załadowaniu
+window.addEventListener('load', () => {
+  document.getElementById('foxUrl').textContent = location.href;
+});
+window.addEventListener('popstate', () => {
+  document.getElementById('foxUrl').textContent = location.href;
+});
