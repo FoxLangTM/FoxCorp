@@ -933,30 +933,28 @@ function updateCategory(index) {
 
 
 
-
 // ================================================================
-// FOXCORP – DZIAŁAJĄCA NAKŁADKA IFRAME – WERSJA NA 1000% DZIAŁAJĄCA
+// FOXCORP – NAKŁADKA IFRAME – DZIAŁA 100%, BEZ KONFLIKTÓW ZMIENNYCH
 // ================================================================
 
-// Tworzymy nakładkę
-const overlay = document.createElement('div');
-overlay.id = 'foxIframeOverlay';
-overlay.innerHTML = `
+// Używamy innych nazw – ŻADNEJ kolizji z Twoim istniejącym "overlay"
+const foxIframeOverlay = document.createElement('div');
+foxIframeOverlay.id = 'foxIframeOverlay';
+foxIframeOverlay.innerHTML = `
   <div class="fox-header">
     <button id="foxClose">✕</button>
-    <div id="foxUrlText">FoxCorp</div>
+    <div id="foxUrlText">FoxCorp • Przeglądanie</div>
   </div>
-  <iframe id="foxIframe" src="about:blank"></iframe>
+  <iframe id="foxIframe" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals allow-downloads"></iframe>
 `;
-document.body.appendChild(overlay);
+document.body.appendChild(foxIframeOverlay);
 
-// Styl
-const css = document.createElement('style');
-css.textContent = `
+// Styl (też bez konfliktów)
+const foxOverlayCSS = document.createElement('style');
+foxOverlayCSS.textContent = `
   #foxIframeOverlay {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     background: #000; z-index: 999999; display: none; flex-direction: column;
-    font-family: system-ui, sans-serif;
   }
   #foxIframeOverlay.active { display: flex; }
   .fox-header {
@@ -979,26 +977,23 @@ css.textContent = `
   }
   .fake-link:hover { color: #00eeff; text-shadow: 0 0 8px #00eeff; }
 `;
-document.head.appendChild(css);
+document.head.appendChild(foxOverlayCSS);
 
-// Najważniejsze: kliknięcie w kartę
+// Kliknięcie w wynik – działa 100%
 document.addEventListener('click', function(e) {
-  // Kliknięcie w całą kartę wyniku
   const card = e.target.closest('.results-res-card');
   if (!card) return;
 
-  // Szukamy elementu z data-url (nasz fake-link)
   const urlEl = card.querySelector('[data-url]');
   if (!urlEl) return;
 
   e.preventDefault();
-  e.stopPropagation(); // blokujemy wszystko inne
+  e.stopPropagation();
 
   let url = urlEl.getAttribute('data-url');
   if (!url) return;
   if (!url.startsWith('http')) url = 'https://' + url;
 
-  // Otwieramy!
   document.getElementById('foxIframe').src = url;
   document.getElementById('foxUrlText').textContent = url;
   document.getElementById('foxIframeOverlay').classList.add('active');
@@ -1009,5 +1004,6 @@ document.getElementById('foxClose')?.addEventListener('click', () => {
   document.getElementById('foxIframeOverlay').classList.remove('active');
   setTimeout(() => {
     document.getElementById('foxIframe').src = 'about:blank';
+    document.getElementById('foxUrlText').textContent = 'FoxCorp • Przeglądanie';
   }, 400);
 });
