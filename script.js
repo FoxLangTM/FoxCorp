@@ -128,9 +128,11 @@ function buildCardHTML(r) {
   `;
 }
 
-cardElement.classList.add("results-res-card");
-cardElement.dataset.url = r.link;
-cardElement.innerHTML = buildCardHTML(r);
+const resultCard = document.createElement("div");
+resultCard.className = "results-res-card";
+resultCard.dataset.url = r.link;
+resultCard.innerHTML = buildCardHTML(r);
+resultsGrid.appendChild(resultCard);
 
 // ======= Show search results =======
 async function showSearchResults(query, reset=false) {
@@ -936,10 +938,10 @@ function updateCategory(index) {
 
 
 document.addEventListener("click", (e) => {
-  const card = e.target.closest(".results-res-card");
-  if (!card) return;
+  const resultCard = e.target.closest(".results-res-card");
+  if (!resultCard) return;
 
-  const url = card.dataset.url;
+  const url = resultCard.dataset.url;
   if (!url) return;
 
   const iframe = document.getElementById("previewFrame");
