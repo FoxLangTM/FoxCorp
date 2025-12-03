@@ -115,7 +115,6 @@ async function fetchResultsDDG(query, page = 0, perPage = 8) {
   } catch { return []; }
 }
 
-// ======= Build card HTML =======
 function buildCardHTML(r) {
   return `
     <img src="${escapeHtml(r.image)}" class="results-res-thumb" loading="lazy"/>
@@ -125,12 +124,13 @@ function buildCardHTML(r) {
         <p class="results-res-text">${escapeHtml(r.snippet)}</p>
         <img src="${escapeHtml(r.image)}" class="results-res-mini" loading="lazy"/>
       </div>
-      <button class="fox-open-btn" data-url="${escapeHtml(r.link)}">
-        ${escapeHtml(r.displayLink)}
-      </button>
     </div>
   `;
 }
+
+cardElement.classList.add("results-res-card");
+cardElement.dataset.url = r.link;
+cardElement.innerHTML = buildCardHTML(r);
 
 // ======= Show search results =======
 async function showSearchResults(query, reset=false) {
@@ -664,6 +664,8 @@ function createPerfControl(dotId) {
 
 // === Zamykaj wyszukiwarkę i dock menu po kliknięciu poza nimi ===
 document.addEventListener("click", (e) => {
+if (e.target.closest('.results-res-card')) return;
+
   const overlay = document.getElementById("overlay");
   const searchMenu = document.querySelector(".search-menu");
   const dockMenu = document.getElementById("dockMenu"); // masz taki id
@@ -933,47 +935,15 @@ function updateCategory(index) {
 
 
 
-// ================================================================
-// FOXCORP – NAKŁADKA IFRAME – DZIAŁA PO KLIKNIĘCIU W WYNIK
-// ================================================================
-
-// Elementy z HTML
-const foxIframe = document.getElementById('foxIframe');
-const foxOverlay = document.getElementById('foxIframeOverlay');
-const foxUrlText = document.getElementById('foxUrlText');
-
-// KLIKNIĘCIE W WYNIK – ZMIENIA SRC I POKAZUJE OVERLAY
-document.addEventListener('click', e => {
-  const card = e.target.closest('.results-res-card');
+document.addEventListener("click", (e) => {
+  const card = e.target.closest(".results-res-card");
   if (!card) return;
 
-  const urlEl = card.querySelector('a[href]');
-  if (!urlEl) return;
+  const url = card.dataset.url;
+  if (!url) return;
 
-  let url = urlEl.href;
-  if (!url.startsWith('http')) url = 'https://' + url;
+  const iframe = document.getElementById("previewFrame");
 
-  foxIframe.src = url;
-  foxOverlay.style.display = 'block';
-  foxIframe.style.display = 'block';
-  foxUrlText.textContent = url;
-
-  e.preventDefault();
-  e.stopPropagation();
-}, true);
-
-// ZAMKNIJ OVERLAY
-const closeFox = () => {
-  foxOverlay.style.display = 'none';
-  foxIframe.style.display = 'none';
-  foxIframe.src = 'about:blank';
-  foxUrlText.textContent = 'FoxCorp • Przeglądanie';
-};
-
-document.getElementById('foxClose')?.addEventListener('click', closeFox);
-document.addEventListener('keydown', e => {
-  if ((e.key === 'Escape' || e.key === 'Backspace') && foxOverlay.style.display === 'block') closeFox();
-});
-window.addEventListener('popstate', () => {
-  if (foxOverlay.style.display === 'block') closeFox();
+  iframe.src = url;
+  iframe.style.display = "block";
 });
