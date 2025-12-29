@@ -10,16 +10,18 @@ user-select: none;
 -webkit-tap-highlight-color: transparent;
 }
 
-@media (prefers-color-scheme: dark) { body { background:#111; color:#fff; } }
+@media (prefers-color-scheme: dark) { body { background:#2d2d2d; color:#fff; } }
+@media (prefers-color-scheme: dark) { results-root { background:#2d2d2d; color: #D1D1DC;} }
+@media (prefers-color-scheme: white) { results-root { color: #2d2d2d;} }
 
 
 .search-button {
 position: fixed; top:20px; right:25px;
-width:45px; height:45px; background:#2e2e2e;
+width:45px; height:45px; background:#383838;
 border-radius:50%; color:#fff; display:flex;
 align-items:center; justify-content:center;
 font-size:25px; cursor:pointer; z-index:20;
-transition: transform .3s;
+transition: transform .3s; box-shadow:0 0 12px rgba(0,0,0,0.5);
 }
 .search-button:active { transform: scale(.9); }
 
@@ -408,15 +410,12 @@ right: 0;
 bottom: 0;
 display: none;
 flex-direction: column;
-background: #fff;
-color: #fff;
 padding: 20px;
 overflow-y: auto;
 -webkit-overflow-scrolling: touch;
 z-index: 15;
 }
 
-@media (prefers-color-scheme: dark) { results-root { background:#111; color:#fff; } }
 
 .results-container {
 flex: none;
@@ -432,12 +431,13 @@ display: grid;
 grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 gap: 20px;
 padding-bottom: 40px;
+color: #D1D1DC;
 }
 
 .loading-indicator {
 text-align: center;
 padding: 20px;
-color: #aaa;
+color: aaa;
 font-size: 14px;
 display: none;
 }
@@ -468,11 +468,6 @@ transition: transform 0.2s, box-shadow 0.2s;
 transform: translateY(-3px);
 box-shadow: 0 0 12px rgba(0,0,0,0.4);
 }
-
-.results-res-card {
-  transition: none; /* albo zostaw tylko hover */
-}
-
 .results-res-thumb {
 width: 120px;
 height: auto;
@@ -515,19 +510,6 @@ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width:100%;
 opacity: 0;
 transform: translateY(-20px);
 transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.fake-link {
-  color: #00aaff;
-  font-size: 14px;
-  cursor: pointer;
-  text-decoration: underline;
-  margin-top: 8px;
-  display: inline-block;
-}
-.fake-link:hover {
-  color: #00eeff;
-  text-shadow: 0 0 8px #00eeff;
 }
 
 .assistant-section {
@@ -700,6 +682,24 @@ from -90deg,
 }
 
 
+.fox-open-btn {
+  background: none;
+  border: none;
+  color: #00aaff;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px 0;
+  margin-top: 8px;
+  font-family: inherit;
+  text-align: left;
+}
+.fox-open-btn:hover {
+  color: #00eeff;
+  text-shadow: 0 0 8px #00eeff;
+}
+
+
 .max-power {
   transform: scale(1) !important; /* Max moc, pełna res */
   filter: none !important;
@@ -723,53 +723,46 @@ from -90deg,
   box-shadow: 0 0 10px rgba(0,100,0,0.8) !important; /* Ciemniejszy zielony dla oszczędności */
 }
 
-#foxIframeOverlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.9);
-  z-index: 1000; /* Wyżej niż settings-overlay (z-index:999) */
-  display: none;
-  flex-direction: column;
+
+.iframed {
+  z-index: 16;
 }
 
-#foxIframeOverlay.show {
-  display: flex;
-}
-
-.fox-header {
-  height: 56px;
-  background: linear-gradient(145deg, #1a1a1a, #0c0c1f);
-  border-bottom: 3px solid #00aaff;
-  display: flex;
-  align-items: center;
-  padding: 0 15px;
-  gap: 15px;
-  box-shadow: 0 6px 30px rgba(0,170,255,0.5);
-}
-
-#foxClose {
-  width: 48px;
-  height: 48px;
-  background: #ff3366;
-  border: none;
-  border-radius: 50%;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-#foxUrlText {
-  color: #00eeff;
-  font-size: 15px;
-  font-weight: bold;
-  flex: 1;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-#foxIframe {
-  flex: 1;
-  border: none;
-  background: white;
-}
+    .iframe {
+        border: 6px solid #333;
+        height: 96.5%;
+        width: 95%;
+        margin: 11px auto;
+        justify-content: center;
+        display: none;
+        border-radius: 12px;
+        box-shadow: 1px 2px 5px rgba(55, 0, 255, 1),
+            -2px -2px 5px rgba(0, 0, 0, 1);
+    }
+    
+     .iframe-kill {
+      transform: translate(20px, -760px);
+      width: 25px;
+      height: 25px;
+      background-color: #CF3A2F;
+      z-index: 1;
+      border-radius: 50%;
+    }
+    
+    .iframe-resize {
+      transform: translate(52px, -785px);
+      width: 25px;
+      height: 25px;
+      background-color: #FEBA39;
+      z-index: 1;
+      border-radius: 50%;
+    }
+    
+    .iframe-minimize {
+      transform: translate(84px, -810px);
+      width: 25px;
+      height: 25px;
+      background-color: #22CB41 ;
+      z-index: 1;
+      border-radius: 50%;
+    }
