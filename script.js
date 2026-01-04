@@ -939,34 +939,56 @@ async function showiframe(event) {
     let target = event.currentTarget || event.target;
     if (!target.getAttribute("data-url")) target = target.closest('[data-url]');
     
-    let url = target.getAttribute("data-url");
+    const url = target.getAttribute("data-url");
 
     if (url) {
         document.body.style.overflow = "hidden";
         container.classList.remove("hidden", "minimized", "compact");
         container.style.display = "flex";
 
-        // Czyścimy poprzednią zawartość
-        iframe.srcdoc = ""; 
-        
-        // WYBÓR TUNELU:
-        // Najskuteczniejsza metoda to użycie publicznej bramki proxy, 
-        // która "opakowuje" stronę w swój adres, omijając blokady frame.
-        
-        // Metoda A: Użycie tunelu webtorender (bardzo silny)
-        const tunnelUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-        
-        // Metoda B: Bezpośredni URL do "bezpiecznego podglądu" 
-        // To jest najbardziej niezawodny sposób na "wszystkie strony"
-        const finalUrl = `https://www.google.com/search?q=${encodeURIComponent(url)}&btnI=Im+Feeling+Lucky`;
-        
-        // Najlepszy darmowy uniwersalny "rozbijacz" blokad (Google Translate jako tunel)
-        const universalProxy = `https://translate.google.com/translate?sl=auto&tl=en&u=${encodeURIComponent(url)}`;
+        // Ekran ładowania w stylu FoxCorp
+        iframe.srcdoc = `
+            <style>
+                body { background: #111; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; margin: 0; }
+                .loader { border: 4px solid #333; border-top: 4px solid #22CB41; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            </style>
+            <div class="loader"></div>
+            <div>Łączenie przez tunel FoxCorp...</div>
+        `;
 
-        // Ustawiamy źródło na tunel Google, który omija SAMEORIGIN dla prawie każdej strony
-        iframe.src = universalProxy;
+        try {
+            // Używamy AllOrigins z dodatkowym parametrem, żeby pobrać surowe dane
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error("Błąd tunelu");
+            let html = await response.text();
 
-        console.log("FoxFrame: Omijanie blokad dla " + url);
+            // --- MAGIA NAPRAWIANIA STRONY ---
+            
+            // 1. Wyciągamy bazowy adres URL (np. https://strona.pl)
+            const urlObj = new URL(url);
+            const baseUrl = urlObj.origin;
+
+            // 2. Wstrzykujemy tag <base>, który mówi przeglądarce: 
+            // "Wszystkie obrazki i style ładuj z oryginalnej domeny, a nie z localhosta"
+            const baseTag = `<base href="${baseUrl}/">`;
+            html = html.replace(/<head>/i, `<head>${baseTag}`);
+
+            // 3. Usuwamy skrypty, które próbują "uciec" z iframe (tzw. frame breakers)
+            html = html.replace(/window\.top/g, "window.self");
+            html = html.replace(/top\.location/g, "self.location");
+
+            // Wrzucamy naprawiony kod do iframe
+            iframe.srcdoc = html;
+
+        } catch (err) {
+            console.error("Błąd FoxFrame:", err);
+            // Jeśli wszystko zawiedzie, próbujemy chociaż załadować to bezpośrednio
+            iframe.removeAttribute("srcdoc");
+            iframe.src = url;
+        }
     }
 }
 
