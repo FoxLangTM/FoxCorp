@@ -933,34 +933,52 @@ function updateCategory(index) {
 
 
 
-let foxWindow = null;
-
-function showiframe(event) {
+async function showiframe(event) {
+    const container = document.getElementById("iframed");
+    const iframe = container.querySelector("iframe");
     let target = event.currentTarget || event.target;
     if (!target.getAttribute("data-url")) target = target.closest('[data-url]');
+    
     const url = target.getAttribute("data-url");
 
     if (url) {
-        // Obliczamy środek ekranu
-        const width = window.innerWidth * 0.8;
-        const height = window.innerHeight * 0.8;
-        const left = (window.innerWidth - width) / 2;
-        const top = (window.innerHeight - height) / 2;
+        document.body.style.overflow = "hidden";
+        container.classList.remove("hidden", "minimized", "compact");
+        container.style.display = "flex";
 
-        // Jeśli okno już istnieje, tylko zmieniamy URL
-        if (foxWindow && !foxWindow.closed) {
-            foxWindow.location.href = url;
-            foxWindow.focus();
-        } else {
-            // Otwieramy nowe, stylowe okno bez pasków narzędzi (wygląda jak aplikacja)
-            foxWindow = window.open(
-                url, 
-                "FoxCorpBrowser", 
-                `width=${width},height=${height},top=${top},left=${left},menubar=no,toolbar=no,location=no,status=no,resizable=yes`
-            );
+        // Dodajemy sandbox, który pozwala na skrypty i formularze, ale chroni przed ucieczką
+        iframe.setAttribute("sandbox", "allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-scripts allow-same-origin");
+
+        try {
+            // Pobieramy kod przez proxy
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            const response = await fetch(proxyUrl);
+            let html = await response.text();
+
+            const urlObj = new URL(url);
+            const baseUrl = urlObj.origin;
+
+            // NAPRAWA STRONY: Wstrzykujemy tag <base> i naprawiamy linki
+            const repair = `
+                <head>
+                <base href="${baseUrl}/">
+                <meta charset="UTF-8">
+                <style>
+                    /* Naprawa problemów z przewijaniem wewnątrz ramki */
+                    body { overflow: auto !important; -webkit-overflow-scrolling: touch !important; }
+                </style>
+            `;
+            html = html.replace(/<head>/i, repair);
+
+            // Wstrzykujemy treść - to zadziała na większości stron
+            iframe.srcdoc = html;
+            
+            console.log("FoxFrame: Rendering " + url);
+        } catch (err) {
+            // Jeśli proxy zawiedzie (np. brak neta), próbujemy bezpośrednio
+            iframe.removeAttribute("srcdoc");
+            iframe.src = url;
         }
-        
-        console.log("FoxCorp: Uruchomiono Shadow Window dla " + url);
     }
 }
 
