@@ -946,25 +946,30 @@ async function showiframe(event) {
         container.classList.remove("hidden", "minimized", "compact");
         container.style.display = "flex";
 
-        // Usuwamy srcdoc, bo on blokuje skrypty (brak "internetu" dla strony)
+        // Czyścimy iframe
         iframe.removeAttribute("srcdoc");
-
-        // Używamy profesjonalnego uniwersalnego mostu (Proxy), 
-        // który omija nagłówki X-Frame-Options i pozwala stronie "żyć"
-        // Wykorzystujemy darmowy serwis 'cors-proxy.htmldriven.com' lub podobne
         
-        const proxyUrl = "https://codertabs.com/proxy/get?url=" + encodeURIComponent(url);
-        
-        // Jeśli codertabs nie działa, używamy najbardziej pancernej metody:
-        // Przekierowanie przez anonimową bramkę, która renderuje JS
-        const finalUrl = `https://p.6789.ru/proxy.php?url=${encodeURIComponent(url)}`;
-        
-        // Najbezpieczniejszy wybór dla Twojego skryptu (Proxy Google)
-        const googleProxy = `https://www.google.ie/search?q=${encodeURIComponent(url)}&btnI=I`;
+        // Wykorzystujemy "AllOrigins" ale w trybie dynamicznym, 
+        // który próbuje zachować interaktywność
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
 
-        iframe.src = finalUrl; 
+        // Jeśli to nie zadziała, jedyną opcją bez własnego serwera 
+        // jest otwarcie strony w nowej karcie, ALE możemy zrobić to "stylowo"
+        // jako fallback, jeśli iframe nie załaduje się w ciągu 3 sekund.
+        
+        iframe.src = proxyUrl; 
 
-        console.log("FoxFrame: Uruchomiono most dla " + url);
+        // DODATEK: Sprawdzanie czy strona żyje
+        const timer = setTimeout(() => {
+            try {
+                if (iframe.contentWindow.length === 0) {
+                     console.log("Wykryto blokadę - przełączanie na tryb awaryjny");
+                     // Tutaj moglibyśmy wyświetlić ładny przycisk "Otwórz w nowym oknie"
+                }
+            } catch (e) {
+                // Jeśli rzuca błędem o "Cross-Origin", to znaczy że strona się załadowała!
+            }
+        }, 3000);
     }
 }
 
