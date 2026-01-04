@@ -725,44 +725,32 @@ from -90deg,
 
 
 .iframed {
-  z-index: 16;
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 3000; /* Wyżej niż wszystko inne */
+    background: rgba(0,0,0,0.9);
+    padding-top: 50px; /* Miejsce na przyciski */
 }
 
-    .iframe {
-        border: 6px solid #333;
-        height: 96.5%;
-        width: 95%;
-        margin: 11px auto;
-        justify-content: center;
-        display: none;
-        border-radius: 12px;
-        box-shadow: 1px 2px 5px rgba(55, 0, 255, 1),
-            -2px -2px 5px rgba(0, 0, 0, 1);
-    }
-    
-     .iframe-kill {
-      transform: translate(20px, -760px);
-      width: 25px;
-      height: 25px;
-      background-color: #CF3A2F;
-      z-index: 1;
-      border-radius: 50%;
-    }
-    
-    .iframe-resize {
-      transform: translate(52px, -785px);
-      width: 25px;
-      height: 25px;
-      background-color: #FEBA39;
-      z-index: 1;
-      border-radius: 50%;
-    }
-    
-    .iframe-minimize {
-      transform: translate(84px, -810px);
-      width: 25px;
-      height: 25px;
-      background-color: #22CB41 ;
-      z-index: 1;
-      border-radius: 50%;
-    }
+.iframe {
+    display: block;
+    width: 95%;
+    height: calc(100% - 70px);
+    margin: 0 auto;
+}
+
+/* Przyciski kontrolne - układamy je w rzędzie w lewym górnym rogu */
+.iframe-kill, .iframe-resize, .iframe-minimize {
+    position: absolute;
+    top: 15px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    transform: none !important; /* Resetujemy Twoje translate */
+}
+
+.iframe-kill { left: 20px; background-color: #CF3A2F; }
+.iframe-resize { left: 50px; background-color: #FEBA39; }
+.iframe-minimize { left: 80px; background-color: #22CB41; }
