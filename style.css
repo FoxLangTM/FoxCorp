@@ -724,23 +724,40 @@ from -90deg,
 }
 
 
-.iframed {
-    display: none;
+/* Wymuszamy ukrycie na starcie */
+#iframed.hidden {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+#iframed {
+    display: flex; /* Zmieniamy na flex tylko gdy nie ma klasy .hidden */
     position: fixed;
     inset: 0;
-    z-index: 3000; /* Wyżej niż wszystko inne */
+    z-index: 3000; /* Bardzo wysoki z-index */
     background: rgba(0,0,0,0.9);
-    padding-top: 50px; /* Miejsce na przyciski */
+    align-items: center;
+    flex-direction: column;
+    transition: opacity 0.3s ease;
 }
 
-.iframe {
-    display: block;
-    width: 95%;
-    height: calc(100% - 70px);
-    margin: 0 auto;
+
+/* Kontener na przyciski - musi być nad iframe */
+.iframe-controls {
+    width: 100%;
+    height: 50px;
+    position: relative;
+    z-index: 3001; /* Wyżej niż iframe */
 }
 
-/* Przyciski kontrolne - układamy je w rzędzie w lewym górnym rogu */
+.iframe-kill {
+    cursor: pointer;
+    z-index: 99999 !important;
+    pointer-events: auto !important;
+}
+
+
 .iframe-kill, .iframe-resize, .iframe-minimize {
     position: absolute;
     top: 15px;
@@ -748,9 +765,47 @@ from -90deg,
     height: 20px;
     border-radius: 50%;
     cursor: pointer;
-    transform: none !important; /* Resetujemy Twoje translate */
+    z-index: 3002; /* Najwyżej */
 }
 
 .iframe-kill { left: 20px; background-color: #CF3A2F; }
 .iframe-resize { left: 50px; background-color: #FEBA39; }
 .iframe-minimize { left: 80px; background-color: #22CB41; }
+
+.iframe {
+    width: 95%;
+    height: calc(100% - 70px);
+    border: none;
+    border-radius: 12px;
+    z-index: 2999; /* Niżej niż przyciski */
+}
+
+
+
+/* Zielony przycisk - Mini podgląd w rogu */
+#iframed.minimized {
+    width: 300px !important;
+    height: 180px !important;
+    top: auto !important;
+    left: auto !important;
+    bottom: 80px !important;
+    right: 20px !important;
+    border: 2px solid #22CB41;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* Żółty przycisk - Tryb okienkowy */
+#iframed.compact {
+    width: 70% !important;
+    height: 70% !important;
+    top: 10% !important;
+    left: 15% !important;
+    border: 2px solid #FEBA39;
+    border-radius: 20px;
+}
+
+/* Płynne przejście między stanami */
+.iframed {
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
