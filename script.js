@@ -931,24 +931,74 @@ function updateCategory(index) {
 }
 
 
+
+
+// Używamy nazwy bez window na początku, tak jak miałeś wcześniej, 
+// ale przypiszemy ją do window wewnątrz, żeby była pancerna.
 function showiframe(event) {
     const container = document.getElementById("iframed");
     const iframe = container.querySelector("iframe");
     
-    // Pobieramy URL z atrybutu data-url przycisku, który został kliknięty
-    const url = event.currentTarget.getAttribute("data-url");
+    // Szukamy przycisku lub linku z URL
+    let target = event.currentTarget || event.target;
+    if (!target.getAttribute("data-url")) {
+        target = target.closest('[data-url]');
+    }
+    
+    const url = target.getAttribute("data-url");
     
     if (url) {
+        // 1. Blokujemy scrollowanie tła, żeby wyniki pod spodem nie uciekały
+        document.body.style.overflow = "hidden"; 
+        
+        // 2. Czyścimy stare klasy (żeby okno zawsze otwierało się na full)
+        container.classList.remove("hidden", "minimized", "compact");
+        
+        // 3. Ładujemy URL i pokazujemy okno
         iframe.src = url;
-        container.style.display = "block"; // Pokazujemy kontener
-        iframe.style.display = "block";    // Pokazujemy sam iframe
+        container.style.display = "flex";
+        console.log("FoxFrame: Loaded " + url);
+    }
+}
+window.showiframe = showiframe;
+
+function hideIframe() {
+    const container = document.getElementById("iframed");
+    if (container) {
+        // 1. Przywracamy scrollowanie tła
+        document.body.style.overflow = ""; 
+        
+        // 2. Chowamy kontener
+        container.classList.add("hidden");
+        container.style.display = "none";
+        
+        // 3. Czyścimy iframe, żeby nie grała muzyka w tle/nie obciążało RAMu
+        const iframe = container.querySelector("iframe");
+        if (iframe) iframe.src = "";
+        
+        console.log("FoxFrame: Clean Exit");
+    }
+}
+window.hideIframe = hideIframe;
+
+function toggleMinimize() {
+    const container = document.getElementById("iframed");
+    if (container) {
+        // Przełączamy klasę minimalizacji
+        container.classList.toggle("minimized");
+        // Usuwamy kompaktowy rozmiar, by uniknąć błędów wizualnych
+        container.classList.remove("compact");
+        console.log("Minimalizacja przełączona");
     }
 }
 
-// Obsługa przycisków kontrolnych iframe (Kill / Zamknij)
-document.querySelector('.iframe-kill')?.addEventListener('click', () => {
+function toggleResize() {
     const container = document.getElementById("iframed");
-    const iframe = container.querySelector("iframe");
-    container.style.display = "none";
-    iframe.src = ""; // Czyścimy src, żeby zatrzymać dźwięki/ładowanie w tle
-});
+    if (container) {
+        // Przełączamy klasę kompaktową
+        container.classList.toggle("compact");
+        // Jeśli powiększamy/zmieniamy rozmiar, wyłączamy minimalizację
+        container.classList.remove("minimized");
+        console.log("Rozmiar przełączony");
+    }
+}
