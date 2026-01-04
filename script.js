@@ -946,32 +946,36 @@ async function showiframe(event) {
         container.classList.remove("hidden", "minimized", "compact");
         container.style.display = "flex";
 
-        // Czyścimy iframe
-        iframe.removeAttribute("srcdoc");
-        
-        // Wykorzystujemy "AllOrigins" ale w trybie dynamicznym, 
-        // który próbuje zachować interaktywność
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+        // 1. Ekran ładowania
+        iframe.srcdoc = "<style>body{background:#111;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;} @keyframes s{to{transform:rotate(360deg)}} .l{border:3px solid #333;border-top:3px solid #22CB41;border-radius:50%;width:30px;height:30px;animation:s 1s linear infinite;}</style><div class='l'></div>";
 
-        // Jeśli to nie zadziała, jedyną opcją bez własnego serwera 
-        // jest otwarcie strony w nowej karcie, ALE możemy zrobić to "stylowo"
-        // jako fallback, jeśli iframe nie załaduje się w ciągu 3 sekund.
-        
-        iframe.src = proxyUrl; 
+        try {
+            // 2. Pobieramy kod strony przez proxy
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            const response = await fetch(proxyUrl);
+            let html = await response.text();
 
-        // DODATEK: Sprawdzanie czy strona żyje
-        const timer = setTimeout(() => {
-            try {
-                if (iframe.contentWindow.length === 0) {
-                     console.log("Wykryto blokadę - przełączanie na tryb awaryjny");
-                     // Tutaj moglibyśmy wyświetlić ładny przycisk "Otwórz w nowym oknie"
-                }
-            } catch (e) {
-                // Jeśli rzuca błędem o "Cross-Origin", to znaczy że strona się załadowała!
-            }
-        }, 3000);
+            // 3. Naprawiamy bazę linków (żeby obrazki i style nie były "puste")
+            const urlObj = new URL(url);
+            const baseUrl = urlObj.origin;
+            
+            // Wstrzykujemy tag <base> na sam początek <head>
+            const repairedHtml = html.replace(/<head>/i, `<head><base href="${baseUrl}/">`);
+
+            // 4. KLUCZ: Wstrzykujemy naprawiony kod jako srcdoc (to zamieni kod na witrynę)
+            iframe.srcdoc = repairedHtml;
+            
+            console.log("FoxFrame: Witryna wyrenderowana pomyślnie");
+
+        } catch (err) {
+            console.error("Błąd renderowania:", err);
+            // Fallback do zwykłego src jeśli proxy padnie
+            iframe.removeAttribute("srcdoc");
+            iframe.src = url;
+        }
     }
 }
+
 
 
 
