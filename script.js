@@ -934,26 +934,50 @@ function updateCategory(index) {
 
 async function showiframe(event) {
     const container = document.getElementById("iframed");
-    const iframe = container.querySelector("iframe");
+    // Zamiast iframe, użyjemy div-a jako "piaskownicy"
+    let sandbox = document.getElementById("sandbox-container");
     
+    if (!sandbox) {
+        sandbox = document.createElement("div");
+        sandbox.id = "sandbox-container";
+        sandbox.style.width = "100%";
+        sandbox.style.height = "100%";
+        sandbox.style.overflow = "auto";
+        sandbox.style.background = "white";
+        container.appendChild(sandbox);
+    }
+
+    // Ukrywamy stary iframe, jeśli tam był
+    const oldIframe = container.querySelector("iframe");
+    if (oldIframe) oldIframe.style.display = "none";
+
     let target = event.currentTarget || event.target;
     if (!target.getAttribute("data-url")) target = target.closest('[data-url]');
     let url = target.getAttribute("data-url");
 
     if (url) {
-        document.body.style.overflow = "hidden";
-        container.classList.remove("hidden");
         container.style.display = "flex";
+        sandbox.innerHTML = "Ładowanie silnika FoxCorp...";
 
-        // TWOJE NOWE POŁĄCZENIE Z SILNIKIEM:
-        const engineBase = "https://foxcorp-engine.foxlang-team.workers.dev/?url=";
-        
-        // Łączymy: Silnik + Zakodowany adres docelowy
-        iframe.src = engineBase + encodeURIComponent(url);
+        const workerUrl = "https://foxcorp-engine.foxlang-team.workers.dev/?url=" + encodeURIComponent(url);
 
-        console.log("FoxCorp Engine: Ładowanie " + url + " przez węzeł foxlang-team");
+        try {
+            const response = await fetch(workerUrl);
+            const html = await response.text();
+
+            // UŻYCIE SHADOW DOM (Izoluje style strony od Twoich stylów)
+            if (!sandbox.shadowRoot) {
+                sandbox.attachShadow({mode: 'open'});
+            }
+            sandbox.shadowRoot.innerHTML = html;
+            
+            console.log("FoxCorp: Strona wstrzyknięta przez Shadow DOM. Blokady ramki nie istnieją.");
+        } catch (err) {
+            sandbox.innerHTML = "Błąd wstrzykiwania: " + err.message;
+        }
     }
 }
+
 
 
 
