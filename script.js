@@ -933,60 +933,67 @@ function updateCategory(index) {
 
 
 
-// Konfiguracja Twojego silnika - upewnij się, że ten adres jest poprawny
+// Adres Twojego silnika na Cloudflare
 const FOX_ENGINE_URL = "https://foxcorp-engine.foxlang-team.workers.dev/?url=";
 
 /**
- * Główna funkcja wywoływana przez onclick="showiframe(event)"
+ * Funkcja wywoływana przez onclick="showiframe(event)" w Twoich kartach
  */
-async function showiframe(event) {
-    // Zapobiegamy domyślnemu działaniu (np. przeładowaniu strony)
+function showiframe(event) {
+    // Zapobiegamy przeładowaniu strony lub domyślnym akcjom
     if (event) event.preventDefault();
 
     const container = document.getElementById("iframed");
     const iframe = container.querySelector("iframe");
-    
-    // Pobieranie elementu, który został kliknięty
+
+    // Pobieramy przycisk (target), który został kliknięty
     let target = event.currentTarget || event.target;
-    
-    // Jeśli kliknięto w ikonę wewnątrz przycisku, szukamy nadrzędnego elementu z atrybutem
-    if (!target.getAttribute("data-url")) {
-        target = target.closest('[data-url]');
-    }
-    
-    let url = target.getAttribute("data-url");
+
+    // Sprawdzamy, czy kliknięty element ma data-url. 
+    // Jeśli nie (np. kliknięto w ikonę wewnątrz), szukamy najbliższego rodzica z data-url.
+    const url = target.getAttribute("data-url") || target.closest('[data-url]').getAttribute("data-url");
 
     if (url && container && iframe) {
-        // 1. Płynne pokazanie okna FoxCorp
-        document.body.style.overflow = "hidden"; 
+        // Blokujemy scrollowanie głównej strony
+        document.body.style.overflow = "hidden";
+        
+        // Pokazujemy kontener z ramką
         container.style.display = "flex";
         container.classList.remove("hidden");
 
-        // 2. Przygotowanie URL dla Twojego silnika
-        // encodeURIComponent chroni przed błędami przy skomplikowanych linkach
-        const finalUrl = FOX_ENGINE_URL + encodeURIComponent(url);
-        
-        // 3. Załadowanie strony do ramki
-        iframe.src = finalUrl;
+        // Łączymy silnik z adresem docelowym
+        // Używamy encodeURIComponent, żeby URL wewnątrz URL nie powodował błędów
+        iframe.src = FOX_ENGINE_URL + encodeURIComponent(url);
 
-        console.log("FoxCorp Engine: Kierowanie do " + url);
+        console.log("FoxCorp Engine: Otwieranie karty -> " + url);
     } else {
-        console.error("FoxCorp Error: Nie znaleziono atrybutu data-url lub kontenera ramki.");
+        console.error("FoxCorp: Nie można odnaleźć adresu URL w klikniętej karcie.");
     }
 }
 
 /**
- * Funkcja zamykająca podgląd, dostępna dla onclick="closeFrame()"
+ * Funkcja zamykająca podgląd
  */
 function closeFrame() {
     const container = document.getElementById("iframed");
     const iframe = container.querySelector("iframe");
-    
+
     if (container) container.style.display = "none";
     document.body.style.overflow = "auto";
     
-    if (iframe) iframe.src = "about:blank"; // Zatrzymuje procesy w tle (np. wideo)
+    // Czyścimy ramkę, żeby np. YouTube przestał grać po zamknięciu
+    if (iframe) iframe.src = "about:blank";
 }
+
+/**
+ * Funkcja pomocnicza do bezpiecznego renderowania tekstu (masz ją już pewnie w kodzie)
+ */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 
 
 
