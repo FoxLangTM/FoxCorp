@@ -932,51 +932,67 @@ function updateCategory(index) {
 
 
 
+// Konfiguracja Twojego silnika
+const FOX_ENGINE_URL = "https://foxcorp-engine.foxlang-team.workers.dev/?url=";
+
+/**
+ * Główna funkcja otwierająca strony w systemie FoxCorp
+ */
 async function showiframe(event) {
     const container = document.getElementById("iframed");
-    // Zamiast iframe, użyjemy div-a jako "piaskownicy"
-    let sandbox = document.getElementById("sandbox-container");
+    const iframe = container.querySelector("iframe");
     
-    if (!sandbox) {
-        sandbox = document.createElement("div");
-        sandbox.id = "sandbox-container";
-        sandbox.style.width = "100%";
-        sandbox.style.height = "100%";
-        sandbox.style.overflow = "auto";
-        sandbox.style.background = "white";
-        container.appendChild(sandbox);
-    }
-
-    // Ukrywamy stary iframe, jeśli tam był
-    const oldIframe = container.querySelector("iframe");
-    if (oldIframe) oldIframe.style.display = "none";
-
+    // Pobieranie URL z klikniętego elementu
     let target = event.currentTarget || event.target;
     if (!target.getAttribute("data-url")) target = target.closest('[data-url]');
     let url = target.getAttribute("data-url");
 
     if (url) {
+        // 1. Wizualne przygotowanie interfejsu
+        document.body.style.overflow = "hidden"; // Blokada przewijania tła
+        container.classList.remove("hidden");
         container.style.display = "flex";
-        sandbox.innerHTML = "Ładowanie silnika FoxCorp...";
 
-        const workerUrl = "https://foxcorp-engine.foxlang-team.workers.dev/?url=" + encodeURIComponent(url);
+        // 2. Ładowanie przez silnik FoxCorp
+        // encodeURIComponent jest kluczowe, aby znaki specjalne w URL nie psuły zapytania
+        const finalUrl = FOX_ENGINE_URL + encodeURIComponent(url);
+        
+        // Ustawiamy źródło ramki
+        iframe.src = finalUrl;
 
-        try {
-            const response = await fetch(workerUrl);
-            const html = await response.text();
+        console.log("FoxCorp Browser: Ładowanie " + url);
 
-            // UŻYCIE SHADOW DOM (Izoluje style strony od Twoich stylów)
-            if (!sandbox.shadowRoot) {
-                sandbox.attachShadow({mode: 'open'});
-            }
-            sandbox.shadowRoot.innerHTML = html;
-            
-            console.log("FoxCorp: Strona wstrzyknięta przez Shadow DOM. Blokady ramki nie istnieją.");
-        } catch (err) {
-            sandbox.innerHTML = "Błąd wstrzykiwania: " + err.message;
-        }
+        // 3. Obsługa zdarzenia załadowania (opcjonalne)
+        iframe.onload = () => {
+            console.log("FoxCorp: Strona załadowana pomyślnie.");
+        };
     }
 }
+
+/**
+ * Funkcja zamykająca podgląd
+ */
+function closeFrame() {
+    const container = document.getElementById("iframed");
+    const iframe = container.querySelector("iframe");
+    
+    container.style.display = "none";
+    document.body.style.overflow = "auto";
+    iframe.src = "about:blank"; // Czyścimy ramkę, by zatrzymać dźwięki/skrypty
+}
+
+// Inicjalizacja przycisków po załadowaniu DOM
+document.addEventListener("DOMContentLoaded", () => {
+    const buttons = document.querySelectorAll("[data-url]");
+    buttons.forEach(btn => {
+        btn.addEventListener("click", showiframe);
+    });
+
+    // Obsługa przycisku zamknięcia (jeśli masz taki w HTML)
+    const closeBtn = document.getElementById("close-btn");
+    if (closeBtn) closeBtn.addEventListener("click", closeFrame);
+});
+
 
 
 
