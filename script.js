@@ -935,72 +935,51 @@ function updateCategory(index) {
 
 
 
-// Konfiguracja Silnika Cloudflare
-const FOX_ENGINE_URL = "https://foxcorp-engine.foxlang-team.workers.dev/?url=";
-
-const foxUI = {
-    overlay: document.getElementById('iframed'), // Twój główny kontener
-    iframe: document.querySelector('.iframe'),
-    urlText: document.getElementById('foxUrlText') |
-
-| { textContent: "" },
-    closeBtn: document.querySelector('.iframe-kill'),
-    resultsGrid: document.querySelector('.results-grid')
-};
-
-// Inicjalizacja workera jako modułu (standard 2026)
-const navigationWorker = new Worker(new URL('./navigation-worker.js', import.meta.url), {
-    type: 'module'
-});
-
-/**
- * Obsługa komunikatów z lokalnego workera
- */
-navigationWorker.onmessage = (event) => {
-    const { action, status, url, error } = event.data;
+function showiframe(event) {
+    const container = document.getElementById("iframed");
+    const iframe = container.querySelector("iframe");
     
-    if (action === 'VALIDATE_URL' && status === 'OK') {
-        // Dopiero po walidacji otwieramy iframe przez silnik Cloudflare
-        document.body.style.overflow = "hidden";
-        foxUI.overlay.style.display = 'flex';
-        foxUI.overlay.classList.remove('hidden');
-        foxUI.iframe.src = FOX_ENGINE_URL + encodeURIComponent(url);
-        foxUI.urlText.textContent = `FoxCorp • Przeglądanie: ${url}`;
-    } else if (status === 'ERROR') {
-        alert(`Błąd nawigacji: ${error}`);
+    // Szukamy przycisku lub linku z URL
+    let target = event.currentTarget || event.target;
+    if (!target.getAttribute("data-url")) {
+        target = target.closest('[data-url]');
     }
-};
-
-/**
- * Główna funkcja wywoływana przez onclick w kartach
- */
-window.showiframe = function(event) {
-    if (event) event.preventDefault();
-    let target = event.currentTarget |
-
-| event.target;
-    if (!target.getAttribute("data-url")) target = target.closest('[data-url]');
+    
     const url = target.getAttribute("data-url");
-
+    
     if (url) {
-        // Wysyłamy prośbę o walidację do workera
-        navigationWorker.postMessage({ action: 'VALIDATE_URL', url });
+        // 1. Blokujemy scrollowanie tła, żeby wyniki pod spodem nie uciekały
+        document.body.style.overflow = "hidden"; 
+        
+        // 2. Czyścimy stare klasy (żeby okno zawsze otwierało się na full)
+        container.classList.remove("hidden", "minimized", "compact");
+        
+        // 3. Ładujemy URL i pokazujemy okno
+        iframe.src = url;
+        container.style.display = "flex";
+        console.log("FoxFrame: Loaded " + url);
     }
-};
-
-// Funkcja zamykania (Killer)
-window.hideIframe = function() {
-    foxUI.overlay.style.display = 'none';
-    foxUI.overlay.classList.add('hidden');
-    foxUI.iframe.src = 'about:blank';
-    document.body.style.overflow = "";
-};
-
-// Obsługa przycisku zamknięcia
-if (foxUI.closeBtn) {
-    foxUI.closeBtn.onclick = window.hideIframe;
 }
+window.showiframe = showiframe;
 
+function hideIframe() {
+    const container = document.getElementById("iframed");
+    if (container) {
+        // 1. Przywracamy scrollowanie tła
+        document.body.style.overflow = ""; 
+        
+        // 2. Chowamy kontener
+        container.classList.add("hidden");
+        container.style.display = "none";
+        
+        // 3. Czyścimy iframe, żeby nie grała muzyka w tle/nie obciążało RAMu
+        const iframe = container.querySelector("iframe");
+        if (iframe) iframe.src = "";
+        
+        console.log("FoxFrame: Clean Exit");
+    }
+}
+window.hideIframe = hideIframe;
 
 
 
