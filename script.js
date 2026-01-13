@@ -116,7 +116,7 @@ async function fetchResultsDDG(query, page = 0, perPage = 8) {
   } catch { return []; }
 }
 
-// ======= Pozostała Twoja logika (buildCardHTML itp.) =======
+// ======= Build card HTML =======
 function buildCardHTML(r) {
   return `
     <img src="${escapeHtml(r.image)}" class="results-res-thumb" loading="lazy"/>
@@ -124,12 +124,10 @@ function buildCardHTML(r) {
       <h3>${escapeHtml(r.title)}</h3>
       <div class="results-res-desc">
         <p class="results-res-text">${escapeHtml(r.snippet)}</p>
-        <img src="${escapeHtml(r.image)}" class="results-res-mini" loading="lazy" />
-      </div>
-      <button onclick="showiframe(event)" class="fox-open-btn" data-url="${escapeHtml(r.link)}">
-        Otwórz w FoxFrame
-      </button>
-    </div>
+        <img src="${escapeHtml(r.image)}" class="results-res-mini" loading="lazy"/></img>
+        </div>
+<button onclick="showiframe(event)" class="fox-open-btn" data-url="${escapeHtml(r.link)}"></button>
+</div>
   `;
 }
 
@@ -215,15 +213,19 @@ function setupTrigger() {
     loading = false;
   }
 
-  function startHold() {
-    trigger.classList.add("active");
-    holdTimer = setTimeout(showNextResults, HOLD_TIME);
-  }
+function startHold() {
+  trigger.classList.add("active");
+  // Efekt "puchnięcia" przycisku podczas trzymania
+  trigger.style.transform = "scale(1.1)";
+  holdTimer = setTimeout(showNextResults, HOLD_TIME);
+}
 
-  function cancelHold() {
-    clearTimeout(holdTimer);
-    trigger.classList.remove("active");
-  }
+function cancelHold() {
+  clearTimeout(holdTimer);
+  trigger.classList.remove("active");
+  trigger.style.transform = "scale(1)"; // Powrót do normy
+}
+
 
   trigger.addEventListener("mousedown", startHold);
   trigger.addEventListener("touchstart", startHold, { passive: true });
@@ -257,13 +259,25 @@ function clearSlots(){ selectedIndex=-1; resultsSlots.forEach(r=>{r.textContent=
 input.addEventListener("input",()=>{
   const q=input.value.trim(); selectedIndex=-1; if(!q) return clearSlots();
   if(debounceTimer) clearTimeout(debounceTimer);
-  debounceTimer=setTimeout(async()=>{
-    const suggestions=await fetchSuggestions(q);
-    resultsSlots.forEach((slot,i)=>{
-      if(suggestions[i]) { slot.textContent=suggestions[i]; slot.classList.add("filled"); }
-      else { slot.textContent=""; slot.classList.remove("filled","active"); }
-    });
-  },200);
+// Znajdź miejsce, gdzie wypełniasz sloty sugestiami i zamień na to:
+debounceTimer = setTimeout(async () => {
+  const suggestions = await fetchSuggestions(q);
+  resultsSlots.forEach((slot, i) => {
+    if (suggestions[i]) {
+      slot.textContent = suggestions[i];
+      slot.classList.add("filled");
+      
+      // Reset animacji, aby przy każdym nowym znaku pola "drgały"
+      slot.style.animation = 'none';
+      slot.offsetHeight; // Trigger reflow
+      slot.style.animation = `hyperPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.04}s forwards`;
+    } else {
+      slot.textContent = "";
+      slot.classList.remove("filled", "active");
+      slot.style.animation = 'none';
+    }
+  });
+}, 200);
 });
 
 input.addEventListener("keydown",(e)=>{
@@ -563,31 +577,50 @@ function createPerfControl(dotId) {
     document.addEventListener("touchend", stopDrag);
   }
 
-    function onDrag(e) {
-    if (e.touches) e.preventDefault();
-    e.stopPropagation();
-    const rect = line.getBoundingClientRect();
-    const currentX = e.touches ? e.touches[0].clientX : e.clientX;
-    let percent = ((currentX - rect.left) / rect.width) * 100;
-    percent = Math.max(0, Math.min(100, percent));
+function onDrag(e) {
+  if (e.touches) e.preventDefault();
+  e.stopPropagation();
+  const rect = line.getBoundingClientRect();
+  const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+  let percent = ((currentX - rect.left) / rect.width) * 100;
+  percent = Math.max(0, Math.min(100, percent));
 
-    dot.style.left = percent + "%";
+  dot.style.left = percent + "%";
 
-    // Dynamiczny kolor dot i shadow
-    const posColor = getColorAt(percent);
-    dot.style.background = posColor; // Kolor dot = kolor linii
-    const darkShadow = darkenColor(posColor);
-    dot.style.boxShadow = `0 2px 30px ${darkShadow}, 0 0 15px rgba(0,170,255,0.5)`; // Ciemniejszy shadow + neon halo
+  // Dynamiczny kolor i shadow kropki (zostawiamy Twój fajny efekt)
+  const posColor = getColorAt(percent);
+  dot.style.background = posColor;
+  const darkShadow = darkenColor(posColor);
+  dot.style.boxShadow = `0 2px 30px ${darkShadow}, 0 0 15px rgba(0,170,255,0.5)`;
 
-    let newLevel = 1;
-    if (percent > 66) newLevel = 3;
-    else if (percent > 33) newLevel = 2;
-
-    if (newLevel !== level) {
-      level = newLevel;
-      updateMode();
-    }
+  // --- NOWA LOGIKA ZAKRESÓW ---
+  let newLevel;
+  if (percent > 65) {
+    newLevel = 100; // Mapujemy na Optimized (oszczędność)
+  } else if (percent >= 35 && percent <= 65) {
+    newLevel = 50;  // Mapujemy na Balanced
+  } else {
+    newLevel = 0;   // Mapujemy na Max Power
   }
+
+  // Aktywujemy zmianę tylko, gdy faktycznie przeskoczymy do innego progu
+  if (newLevel !== level) {
+    level = newLevel;
+    applyOptimizations(level); // Wywołujemy główną funkcję optymalizacji
+    updateModeVisuals(level);  // Zmieniamy wygląd paska
+  }
+}
+
+
+function updateModeVisuals(lvl) {
+  const colors = {
+    0: "linear-gradient(90deg, #ff3333, #ff5555)",
+    50: "linear-gradient(90deg, #ffd700, #ffdd33)",
+    100: "linear-gradient(90deg, #33ff66, #66ffaa)"
+  };
+  line.style.background = colors[lvl];
+}
+
 
   function stopDrag() {
     document.removeEventListener("mousemove", onDrag);
@@ -651,12 +684,15 @@ function createPerfControl(dotId) {
     historyIndex = historyStack.length - 1;
     nextPage++;
 
-    uniqueResults.forEach((r) => {
-      const card = document.createElement("div");
-      card.className = "results-res-card";
-      card.innerHTML = buildCardHTML(r);
-      grid.appendChild(card);
-    });
+    // Wewnątrz showNextResults zastąp pętlę forEach:
+uniqueResults.forEach((r, index) => {
+  const card = document.createElement("div");
+  card.className = "results-res-card hyper-animate"; // Dodaj klasę
+  card.style.animationDelay = `${index * 0.05}s`;   // Dodaj delay
+  card.innerHTML = buildCardHTML(r);
+  grid.appendChild(card);
+});
+
 
     loading = false;
   }
@@ -693,30 +729,25 @@ document.addEventListener("click", (e) => {
 
 function applyOptimizations(level) {
   const body = document.body;
-  body.classList.remove('max-power', 'balanced', 'optimized'); // Czyszczenie klas
+  body.classList.remove('max-power', 'balanced', 'optimized');
 
-  if (level == 0) { // Low end: max moc, daje wszystko
+  if (level == 100) { // Max Power - Pełne efekty
     body.classList.add('max-power');
-    // CSS dla .max-power: transform: scale(1); filter: none; /* Pełne animacje plus neon-metal gradient */
-    // Plus kreatywny add-on: init webGL neon-metal background dla dostojnego efektu
-    initWebGLNeonBackground();
-    // Brak optymalizacji – pełna moc
-    body.style.overflow = ''; // Reset rozciągnięcia
-  } else if (level == 50) { // Half end: zrównoważona, średnia
+    initWebGLNeonBackground(); 
+    body.style.overflow = '';
+    console.log("Tryb: Pełna Wydajność");
+  } else if (level == 50) { // Balanced - Środek
     body.classList.add('balanced');
-    // CSS dla .balanced: transform: scale(0.95); filter: grayscale(0.1); /* Lekka równowaga */
-    body.style.overflow = ''; // Reset
-  } else { // 100 full end: optymalizacja, oszczędności
+    body.style.overflow = '';
+    console.log("Tryb: Zrównoważony");
+  } else { // 0 - Optimized/Power Save - Wyłączamy zbędne rzeczy
     body.classList.add('optimized');
-    body.style.animation = 'none'; // Bezpośrednia blokada animacji dla body
-    // CSS dla .optimized: transform: scale(0.3); filter: grayscale(0.5) blur(1px); transition: none; /* Dodatkowa blokada, mocniejsze zmniejszenie pikseli */
-    // Skracanie nie używanych skryptów: clear non-essential timeouts/intervals
-    if (debounceTimer) clearTimeout(debounceTimer); // Przykładowo, skracanie debounce
-    // Opcjonalnie: if (someAnimInterval) clearInterval(someAnimInterval); // Dodaj dla swoich loopów
-    // Symulacja zmiany res: scale dla "mniej pikseli" (jak 980x520) + overflow hidden dla rozciągnięcia
+    if (debounceTimer) clearTimeout(debounceTimer);
     body.style.overflow = 'hidden';
+    console.log("Tryb: Oszczędny");
   }
 }
+
 
 function initWebGLNeonBackground() {
   // Kreatywny add-on: webGL canvas z metaliczno-neonowym gradientem (srebrno-błękitny puls z ciemniejszym halo)
@@ -894,21 +925,40 @@ perfRange?.addEventListener('input', async (e) => {
   applyOptimizations(snapValue(percent)); // Apply tryb
 });
 
-// Na change: To samo, finalny zapis i apply
+// Podmień fragment w swoim skrypcie:
 perfRange?.addEventListener('change', async (e) => {
-  await setValue(e.target.value);
-  const percent = getDotPercent();
-  applyOptimizations(snapValue(percent));
+  const val = parseInt(e.target.value); // Pobiera 0, 50 lub 100
+  await setValue(val.toString());
+  
+  // Teraz aktywujemy tryb na podstawie konkretnej wartości
+  applyOptimizations(val); 
 
-  // Update gradient na podstawie snap
-  const snapped = snapValue(percent);
+  // Dynamiczna zmiana kolorów paska na podstawie progu
   const colors = {
-    0: "linear-gradient(90deg, #ff3333, #ff5555)",
-    50: "linear-gradient(90deg, #ffaa33, #ffdd33)",
-    100: "linear-gradient(90deg, #33ff66, #66ffaa)"
+    0: "linear-gradient(90deg, #ff3333, #ff5555)", // Low
+    50: "linear-gradient(90deg, #ffaa33, #ffdd33)", // Balanced
+    100: "linear-gradient(90deg, #33ff66, #66ffaa)" // Max Power
   };
-  e.target.style.background = colors[snapped] || colors[0];
+  e.target.style.background = colors[val] || colors[0];
 });
+
+// Upewnij się, że applyOptimizations czyta te wartości:
+function applyOptimizations(level) {
+  const body = document.body;
+  body.classList.remove('max-power', 'balanced', 'optimized');
+
+  if (level == 100) { // Max Power
+    body.classList.add('max-power');
+    console.log("Tryb: Pełna Wydajność");
+  } else if (level == 50) { // Balanced
+    body.classList.add('balanced');
+    console.log("Tryb: Zrównoważony");
+  } else { // 0 - Low End
+    body.classList.add('optimized');
+    console.log("Tryb: Oszczędny");
+  }
+}
+
 
 // Automatyczny zapis raw na wyjście
 window.addEventListener('beforeunload', async () => {
@@ -935,6 +985,8 @@ function updateCategory(index) {
 
 
 
+// Używamy nazwy bez window na początku, tak jak miałeś wcześniej, 
+// ale przypiszemy ją do window wewnątrz, żeby była pancerna.
 function showiframe(event) {
     const container = document.getElementById("iframed");
     const iframe = container.querySelector("iframe");
@@ -965,23 +1017,22 @@ window.showiframe = showiframe;
 function hideIframe() {
     const container = document.getElementById("iframed");
     if (container) {
-        // 1. Przywracamy scrollowanie tła
         document.body.style.overflow = ""; 
+        container.classList.add("hidden"); // Uruchamia animację opacity/scale z CSS
         
-        // 2. Chowamy kontener
-        container.classList.add("hidden");
-        container.style.display = "none";
-        
-        // 3. Czyścimy iframe, żeby nie grała muzyka w tle/nie obciążało RAMu
-        const iframe = container.querySelector("iframe");
-        if (iframe) iframe.src = "";
+        // Czekamy na koniec animacji (np. 500ms) zanim faktycznie usuniemy element z widoku
+        setTimeout(() => {
+            if (container.classList.contains("hidden")) {
+                container.style.display = "none";
+                const iframe = container.querySelector("iframe");
+                if (iframe) iframe.src = "";
+            }
+        }, 500); 
         
         console.log("FoxFrame: Clean Exit");
     }
 }
 window.hideIframe = hideIframe;
-
-
 
 function toggleMinimize() {
     const container = document.getElementById("iframed");
