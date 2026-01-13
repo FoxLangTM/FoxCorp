@@ -9,6 +9,8 @@ transition: background .3s, color .3s;
   --text-white: #F9F9FA;
   --text-gray: #AFAFAF;
   --accent-green: #22D461;
+  --hyper-out: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --hyper-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
@@ -42,27 +44,71 @@ user-select: none;
 -webkit-tap-highlight-color: transparent;
 }
 
-@media (prefers-color-scheme: dark) { body { background: #131313; color:#fff; } }
+@media (prefers-color-scheme: dark) { body { background: #131313; } }
 /*Przyszłość background: linear-gradient(to top, #2E43A8 0%, #040404 40%)*/
+@media (prefers-color-scheme: white) { body { background: #F9F9FA; } }
+@media (prefers-color-scheme: white) { loading-indicator { color:#040404; } }
+@media (prefers-color-scheme: dark) { loading-indicator { color:#AFAFAF; } }
 
 @media (prefers-color-scheme: dark) { results-root { background: #131313;
  color: #D1D1DC;} }
  /*Przyszłość background: linear-gradient(180deg, #181819 0%, #131313 100%);*/
  
 @media (prefers-color-scheme: white) { results-root { color: #2d2d2d;} }
+@media (prefers-color-scheme: white) { search-button { background-color: #B0B0B1;} }
 
 
-.search-button {
-position: fixed; top:20px; right:25px;
-width:45px; height:45px; background:#383838;
-border-radius:50%; color:#fff; display:flex;
-align-items:center; justify-content:center;
-font-size:25px; cursor:pointer; z-index:20;
-transition: transform .3s; box-shadow:0 0 12px rgba(0,0,0,0.5);
+
+/* Globalna reguła dla wszystkich interaktywnych obiektów */
+.search-menu, .settings-panel, .results-res-card, .dock-menu, .dot, .settings-dock {
+  transition: all 0.5s var(--hyper-out) !important;
 }
 
-.search-button:hover { background-color: #2E43A8; }
-.search-button:active { transform: scale(.9); }
+/* Efekt naciśnięcia (Scale Down) dla KAŻDEGO klikalnego elementu */
+.results-res-card:active, .dot:active, .settings-button:active, .menu-item:active {
+  transform: scale(0.92) !important;
+  filter: brightness(0.8);
+}
+
+
+@keyframes searchPulse {
+  0% { box-shadow: 0 0 0 0 rgba(46, 67, 168, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(46, 67, 168, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 67, 168, 0); }
+}
+
+.search-button {
+  background-color: #181818;
+  animation: searchPulse 2s infinite;
+  transition: transform 0.2s ease;
+  border: none;
+  border-radius: 50%;
+  position: fixed;
+  top:20px;
+  right:25px;
+  width:45px;
+  height:45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  font-size:25px;
+  cursor:pointer;
+  z-index:20;
+}
+.search-button:hover {
+   background-color: #2E43A8;
+ }
+.search-button:active {
+   background-color: #2E43A8;
+  transform: scale(0.9); /* Reakcja na dotyk */
+}
+.search-button:active span {
+  text-shadow: 0 0 10px #040404; /* Efekt neonu */
+  filter: blur(0.5px); /* Lekkie rozmycie "high-tech" */
+  transform: rotate(15deg); /* Delikatny obrót ikony przy kliknięciu */
+}
 
 
 .overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:40; }
@@ -88,6 +134,7 @@ outline:none; color:white; font-size:15px;
 
 
 .result {
+  opacity: 0;
 background:#2e2e2e; border-radius:25px; padding:12px 16px;
 text-align:center; color:#888; font-weight:bold;
 font-size:14px; margin-top:8px; transition: background 0.2s, color 0.2s;
@@ -95,6 +142,33 @@ cursor:pointer;
 }
 .result.filled { color:#fff; }
 .result.active { background:#444; }
+
+@keyframes hyperPop {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.6) translateY(15px); 
+    filter: blur(5px);
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1) translateY(0); 
+    filter: blur(0);
+  }
+}
+
+.result.filled {
+  transition: background 0.2s ease, transform 0.2s var(--hyper-out);
+}
+
+/* Efekt najechania myszką lub zaznaczenia strzałką */
+.result.active, .result.filled:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.03) translateX(5px);
+  border-left: 3px solid #424242;
+}
+
+
+
 
 
 .settings-dock {
@@ -132,7 +206,7 @@ display: none; flex-direction: column;
 background:#2e2e2e; border-radius:15px; padding:5px; gap:7px;
 box-shadow:0 0 12px rgba(0,0,0,0.4);
 }
-.dock-menu.show { display:flex; }
+
 .dock-menu .menu-item {
 width:70px; height:36px; background:#3e3e3e;
 color:#fff; border-radius: 13px; display:flex;
@@ -140,6 +214,24 @@ justify-content:center; align-items:center;
 cursor:pointer; font-size:18px; transition: background 0.2s;
 }
 .dock-menu .menu-item:hover { background:#333; }
+
+
+#dockMenu {
+  /* ... Twoje bazowe style ... */
+  display: flex;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(120%) scale(0.8);
+  transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#dockMenu.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+
 
 
 .settings-overlay {
@@ -420,24 +512,36 @@ left: 20px;
   transition: background 0.3s ease;
 }
 
+
 #perfRange3::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: linear-gradient(45deg, #a9a9a9, #00aaff); /* Metaliczno-neonowy gradient rdzenia */
-  cursor: grab;
-  box-shadow: 0 0 15px rgba(0,170,255,0.8), inset 0 0 5px rgba(169,169,169,0.6); /* Halo z metalicznym odbiciem */
-  transition: box-shadow 0.3s ease, background 0.3s ease, transform 0.2s ease; /* Płynna reakcja na przesuwanie */
+  width: 24px; /* Większy dla łatwiejszego dotyku na mobile */
+  height: 24px;
+  background: #FCFCFD;
+  border: 4px solid #00aaff; /* Obwódka w kolorze FoxCorp */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-#perfRange3:active::-webkit-slider-thumb,
+#perfRange3:active::-webkit-slider-thumb {
+  transform: scale(1.3); /* "Puchnięcie" przy dotyku */
+}
+
+
 #perfRange3:focus::-webkit-slider-thumb { /* Intensywniejszy podczas drag dla feedbacku */
   box-shadow: 0 0 25px rgba(0,170,255,1), inset 0 0 8px rgba(169,169,169,0.8);
   background: linear-gradient(45deg, #00aaff, #a9a9a9); /* Odwrócony gradient dla dynamiki ruchu */
   transform: scale(1.15); /* Lekki zoom podkreślający płynność */
 }
+
+.max-power .performance-dot {
+  animation: pulseNeon 2s infinite;
+}
+
+@keyframes pulseNeon {
+  0% { box-shadow: 0 0 15px rgba(255, 51, 51, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(255, 51, 51, 0.8); }
+  100% { box-shadow: 0 0 15px rgba(255, 51, 51, 0.4); }
+}
+
 
 
 
@@ -469,7 +573,7 @@ scrollbar-width: thin;
 display: grid;
 grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 gap: 20px;
-padding-bottom: 40px;
+padding-bottom: 70px;
 color: #D1D1DC;
 }
 
@@ -477,9 +581,26 @@ color: #D1D1DC;
 .loading-indicator {
 text-align: center;
 padding: 20px;
-color: aaa;
+color: #040404;
 font-size: 14px;
 display: none;
+}
+
+
+
+@keyframes hyperEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hyper-animate {
+  animation: hyperEntrance 0.6s var(--hyper-out) forwards;
 }
 
 
@@ -505,6 +626,25 @@ padding: 12px 15px;
 overflow: hidden;
 transition: transform 0.2s, box-shadow 0.2s;
 }
+
+.results-res-card {
+    transform: translateY(20px);
+    /* Transition dla efektów hover/active */
+    transition: transform 0.3s var(--hyper-out), box-shadow 0.3s ease;
+}
+
+/* Klasa którą dodamy w JS */
+.card-appear {
+    animation: hyperEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes hyperEntrance {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .results-res-card:hover {
 transform: translateY(-3px);
 box-shadow: 0 0 12px rgba(0,0,0,0.4);
@@ -652,7 +792,7 @@ position: relative;
 .scroll-trigger {
 position: fixed;
 left: 15px;
-top: 95%;
+top: 92%;
 transform: translateY(-50%);
 width: 45px;
 height: 45px;
@@ -728,6 +868,21 @@ from -90deg,
 }
 }
 
+.scroll-trigger {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.scroll-trigger.active .trigger-dot {
+  animation: pulseCharge 1s infinite alternate;
+  background: #2E2E2E;
+}
+
+@keyframes pulseCharge {
+  from { box-shadow: 0 0 5px #000344; }
+  to { box-shadow: 0 0 25px #000344, 0 0 40px #000344; }
+}
+
+
 
 .fox-open-btn {
   background: none;
@@ -798,23 +953,6 @@ from -90deg,
     z-index: 3001; /* Wyżej niż iframe */
 }
 
-.iframe-kill {
-    cursor: pointer;
-    z-index: 99999 !important;
-    pointer-events: auto !important;
-}
-
-
-.iframe-kill, .iframe-resize, .iframe-minimize {
-    position: absolute;
-    top: 15px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    cursor: pointer;
-    z-index: 3002; /* Najwyżej */
-}
-
 .iframe-kill { left: 20px; background-color: #CF3A2F; }
 .iframe-resize { left: 50px; background-color: #FEBA39; }
 .iframe-minimize { left: 80px; background-color: #22CB41; }
@@ -852,7 +990,33 @@ from -90deg,
     border-radius: 20px;
 }
 
-/* Płynne przejście między stanami */
-.iframed {
-    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+#iframed {
+    display: flex !important; /* Musi być flex cały czas */
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(0,0,0,0.9);
+    align-items: center;
+    flex-direction: column;
+    
+    /* HYPER OS EFFECT */
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.1) translateY(30px);
+    filter: blur(10px);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+#iframed:not(.hidden) {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+}
+
+
+.overlay.show, .settings-overlay.show {
+  backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.4); /* Ciemniejsza nakładka dla kontrastu */
+}
+
