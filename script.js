@@ -1143,34 +1143,3 @@ function pinCurrentProcess() {
     }
 }
 
-
-
-function newCardMannager() {
-    // 1. Najpierw wywołujemy Twoją funkcję przypinania (pin)
-    // Używamy Twojej logiki pinCurrentProcess, aby zapisać URL
-    if (typeof pinCurrentProcess === 'function') {
-        pinCurrentProcess();
-    }
-
-    // 2. Resetujemy ekran i wracamy do strony głównej
-    const container = document.getElementById("iframed");
-    const iframe = container.querySelector("iframe");
-
-    if (container) {
-        // Dodajemy klasę ukrywającą (dla animacji)
-        container.classList.add("hidden");
-        document.body.style.overflow = ""; 
-
-        // Natychmiastowe czyszczenie i powrót
-        setTimeout(() => {
-            container.style.display = "none";
-            if (iframe) {
-                iframe.src = ""; // Czyścimy src, żeby strona nie działała w tle
-            }
-            console.log("System: Card pinned and returned to Home");
-        }, 500); // czas dopasowany do Twojej animacji hideIframe
-    }
-}
-
-// Upewniamy się, że funkcja jest dostępna globalnie dla przycisku
-window.newCardMannager = newCardMannager;
