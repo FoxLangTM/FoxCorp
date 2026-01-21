@@ -1,3 +1,24 @@
+// ==================================//
+// BEZPIECZEŃSTWO
+// ==================================//
+if (window.trustedTypes) {
+    window.trustedTypes.createPolicy('myPolicy', {
+        createHTML: (input) => {
+            if (/script|iframe|object|embed/i.test(input)) {
+                console.warn('Niebezpieczne HTML zablokowane:', input);
+                return '';
+            }
+            return input;
+        },
+        createScript: (input) => {
+            console.warn('Inline script zablokowany przez Trusted Types');
+            return null;
+        }
+    });
+}
+//----------------------------------------------------------//
+
+
 const btn = document.getElementById("searchBtn");
 const overlay = document.getElementById("overlay");
 const input = document.getElementById("searchInput");
@@ -996,16 +1017,40 @@ function showiframe(event) {
         target = target.closest('[data-url]');
     }
     
-    const url = target.getAttribute("data-url");
+    let rawUrl = target.getAttribute("data-url");
     
-    if (url) {
+    if (rawUrl) {
+        let cleanUrl = rawUrl;
+
+        // --- LOGIKA CZYSZCZENIA DUCKDUCKGO ---
+        // Jeśli link zawiera "uddg=", wyciągamy to, co jest po nim
+        if (rawUrl.includes("uddg=")) {
+            const parts = rawUrl.split("uddg=");
+            if (parts.length > 1) {
+                // Wyciągamy URL i dekodujemy znaki specjalne (np. %2F na /)
+                cleanUrl = decodeURIComponent(parts[1].split("&")[0]);
+            }
+        }
+        // Jeśli link zaczyna się od //, dodajemy https:
+        if (cleanUrl.startsWith("//")) {
+            cleanUrl = "https:" + cleanUrl;
+        }
+        // -------------------------------------
+
         document.body.style.overflow = "hidden"; 
         container.classList.remove("hidden", "minimized", "compact");
-        iframe.src = url;
+        
+        // TWOJA KONFIGURACJA SILNIKA
+        const enginePrefix = "https://foxcorp-engine.foxlang-team.workers.dev/?url=";
+        iframe.src = enginePrefix + cleanUrl;
+
         container.style.display = "flex";
+        console.log("FoxEngine Cleaned URL: " + cleanUrl);
     }
 }
 window.showiframe = showiframe;
+
+
 
 function hideIframe() {
     const container = document.getElementById("iframed");
@@ -1143,3 +1188,34 @@ function pinCurrentProcess() {
     }
 }
 
+
+
+function newCardMannager() {
+    // 1. Najpierw wywołujemy Twoją funkcję przypinania (pin)
+    // Używamy Twojej logiki pinCurrentProcess, aby zapisać URL
+    if (typeof pinCurrentProcess === 'function') {
+        pinCurrentProcess();
+    }
+
+    // 2. Resetujemy ekran i wracamy do strony głównej
+    const container = document.getElementById("iframed");
+    const iframe = container.querySelector("iframe");
+
+    if (container) {
+        // Dodajemy klasę ukrywającą (dla animacji)
+        container.classList.add("hidden");
+        document.body.style.overflow = ""; 
+
+        // Natychmiastowe czyszczenie i powrót
+        setTimeout(() => {
+            container.style.display = "none";
+            if (iframe) {
+                iframe.src = ""; // Czyścimy src, żeby strona nie działała w tle
+            }
+            console.log("System: Card pinned and returned to Home");
+        }, 500); // czas dopasowany do Twojej animacji hideIframe
+    }
+}
+
+// Upewniamy się, że funkcja jest dostępna globalnie dla przycisku
+window.newCardMannager = newCardMannager;
