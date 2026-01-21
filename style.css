@@ -951,15 +951,8 @@ from -90deg,
 }
 
 
-/* Wymuszamy ukrycie na starcie */
-#iframed.hidden {
-    display: none !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
 #iframed {
-    display: none; /* Zmieniamy na flex tylko gdy nie ma klasy .hidden */
+    display: flex; /* Zmieniamy na flex tylko gdy nie ma klasy .hidden */
     position: fixed;
     inset: 0;
     z-index: 3000; /* Bardzo wysoki z-index */
@@ -967,6 +960,13 @@ from -90deg,
     align-items: center;
     flex-direction: column;
     transition: opacity 0.3s ease;
+}
+
+/* Wymuszamy ukrycie na starcie */
+#iframed.hidden {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 
@@ -1033,7 +1033,7 @@ from -90deg,
 }
 
 #iframed {
-    display: none; /* Musi być flex cały czas */
+    display: flex; /* Musi być flex cały czas */
     position: fixed;
     inset: 0;
     z-index: 3000;
