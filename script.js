@@ -985,71 +985,45 @@ function updateCategory(index) {
 
 
 
-// Używamy nazwy bez window na początku, tak jak miałeś wcześniej, 
-// ale przypiszemy ją do window wewnątrz, żeby była pancerna.
 function showiframe(event) {
     const container = document.getElementById("iframed");
     const iframe = container.querySelector("iframe");
     
-    let target = event.currentTarget || event.target;
-    if (!target.getAttribute("data-url")) {
-        target = target.closest('[data-url]');
-    }
-    
-    let rawUrl = target.getAttribute("data-url");
-    
-    if (rawUrl) {
-        let cleanUrl = rawUrl;
+    // ... reszta Twojej logiki url i target ...
 
-        // --- LOGIKA CZYSZCZENIA DUCKDUCKGO ---
-        // Jeśli link zawiera "uddg=", wyciągamy to, co jest po nim
-        if (rawUrl.includes("uddg=")) {
-            const parts = rawUrl.split("uddg=");
-            if (parts.length > 1) {
-                // Wyciągamy URL i dekodujemy znaki specjalne (np. %2F na /)
-                cleanUrl = decodeURIComponent(parts[1].split("&")[0]);
-            }
-        }
-        // Jeśli link zaczyna się od //, dodajemy https:
-        if (cleanUrl.startsWith("//")) {
-            cleanUrl = "https:" + cleanUrl;
-        }
-        // -------------------------------------
-
-        document.body.style.overflow = "hidden"; 
-        container.classList.remove("hidden", "minimized", "compact");
+    if (url) {
+        // 1. Najpierw usuwamy klasę ukrywającą
+        container.classList.remove("hidden");
+        // 2. Ustawiamy flex, żeby kontener się pojawił
+        container.style.display = "flex";
         
-        // TWOJA KONFIGURACJA SILNIKA
+        document.body.style.overflow = "hidden"; 
+        
         const enginePrefix = "https://foxcorp-engine.foxlang-team.workers.dev/?url=";
         iframe.src = enginePrefix + cleanUrl;
-
-        container.style.display = "flex";
-        console.log("FoxEngine Cleaned URL: " + cleanUrl);
     }
 }
-window.showiframe = showiframe;
-
-
 
 function hideIframe() {
     const container = document.getElementById("iframed");
     if (container) {
+        // 1. Dodajemy klasę ukrywającą (to uruchomi ewentualną animację)
+        container.classList.add("hidden");
         document.body.style.overflow = ""; 
-        container.classList.add("hidden"); // Uruchamia animację opacity/scale z CSS
         
-        // Czekamy na koniec animacji (np. 500ms) zanim faktycznie usuniemy element z widoku
+        // 2. Całkowicie wyłączamy wyświetlanie po krótkim czasie (animacja)
         setTimeout(() => {
             if (container.classList.contains("hidden")) {
                 container.style.display = "none";
                 const iframe = container.querySelector("iframe");
-                if (iframe) iframe.src = "";
+                if (iframe) iframe.src = ""; 
             }
-        }, 500); 
-        
-        console.log("FoxFrame: Clean Exit");
+        }, 300); // 300ms to standardowy czas dla płynnego znikania
     }
 }
-window.hideIframe = hideIframe;
+
+
+
 
 function toggleMinimize() {
     const container = document.getElementById("iframed");
