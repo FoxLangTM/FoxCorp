@@ -2,8 +2,6 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
 }
 
-
-
 const debounce = (func, delay) => {
     let timeout;
     return (...args) => {
@@ -23,34 +21,20 @@ const throttle = (func, limit) => {
     };
 };
 
-// Przykład użycia dla wyszukiwarki:
-// Zamiast: searchInput.addEventListener('input', startSearch);
-// Użyj: searchInput.addEventListener('input', debounce(startSearch, 300));
-
-
-
-
 // ==================================//
 // BEZPIECZEŃSTWO
 // ==================================//
 if (window.trustedTypes) {
     window.trustedTypes.createPolicy('myPolicy', {
         createHTML: (input) => {
-            if (/script|iframe|object|embed/i.test(input)) {
-                console.warn('Niebezpieczne HTML zablokowane:', input);
-                return '';
-            }
+            if (/script|iframe|object|embed/i.test(input)) return '';
             return input;
         },
-        createScript: (input) => {
-            console.warn('Inline script zablokowany przez Trusted Types');
-            return null;
-        }
+        createScript: (input) => null
     });
 }
-//----------------------------------------------------------//
 
-
+// ======= Elementy Interfejsu =======
 const btn = document.getElementById("searchBtn");
 const overlay = document.getElementById("overlay");
 const input = document.getElementById("searchInput");
@@ -63,11 +47,8 @@ let debounceTimer = null;
 let nextPage = 0;
 let currentQuery = "";
 let loading = false;
-
 let historyStack = [];
-let historyIndex = -1;
 let shownLinks = new Set();
-
 
 function detectLang() {
   const sysLang = navigator.languages?.[0] || navigator.language || "pl";
@@ -77,23 +58,16 @@ function detectLang() {
 }
 const lang = detectLang();
 
-// ======= Proxy list =======
 const proxies = [
   "https://corsproxy.io/?",
   "https://api.allorigins.win/raw?url=",
   "https://thingproxy.freeboard.io/fetch/",
 ];
 
-// ======= HTML escape =======
 function escapeHtml(str = "") {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+  return String(str).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
 
-// ======= Ensure results root =======
 function ensureResultsRoot() {
   let root = document.querySelector(".results-root");
   if (!root) {
@@ -102,74 +76,45 @@ function ensureResultsRoot() {
     root.innerHTML = `
       <div class="results-header"><h2 id="queryTitle"></h2></div>
       <div class="results-container">
-      <div class="assistantBtn"</div>
         <div class="results-grid"></div>
       </div>
       <div class="scroll-trigger">
         <div class="trigger-dot"></div>
         <div class="trigger-line"></div>
-      </div>
-    `;
+      </div>`;
     document.body.appendChild(root);
   }
   return root;
 }
 
-// ======= Fetch via proxy =======
 async function fetchWithProxyText(url) {
   for (const p of proxies) {
     try {
-      const full = p + encodeURIComponent(url);
-      const res = await fetch(full, { cache: "no-store" });
-      if (!res || !res.ok) continue;
-      const text = await res.text();
-      if (text) return text;
+      const res = await fetch(p + encodeURIComponent(url), { cache: "no-store" });
+      if (res?.ok) return await res.text();
     } catch {}
   }
   return null;
 }
 
-// ======= Resolve DuckDuckGo redirect =======
-function resolveDuckHref(href) {
-  try {
-    const url = new URL(href);
-    if (url.hostname === "duckduckgo.com" && url.searchParams.has("uddg")) {
-      return decodeURIComponent(url.searchParams.get("uddg"));
-    }
-    return href;
-  } catch {
-    return href;
-  }
-}
-
-// ======= Fetch DuckDuckGo results =======
 async function fetchResultsDDG(query, page = 0, perPage = 8) {
   const start = page * perPage;
-  const target = `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}&s=${start}`;
-  const text = await fetchWithProxyText(target);
+  const text = await fetchWithProxyText(`https://duckduckgo.com/html/?q=${encodeURIComponent(query)}&s=${start}`);
   if (!text) return [];
-
-  try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, "text/html");
-    const arr = [];
-    doc.querySelectorAll(".result, .web-result").forEach((r) => {
-      const a = r.querySelector("a.result__a");
-      if (!a) return;
-      const href = a.href || "";
-      const title = (a.textContent || "").trim().slice(0,120);
-      const snippet = (r.querySelector(".result__snippet")?.textContent || "").trim().slice(0,200);
-      const url = resolveDuckHref(href);
-      let display = "";
-      try { display = new URL(url).hostname.slice(0,25); } catch { display = url.slice(0,25); }
-      const img = `https://icons.duckduckgo.com/ip3/${display}.ico`;
-      arr.push({ title, snippet, link: url, displayLink: display, image: img });
-    });
-    return arr.slice(0,perPage);
-  } catch { return []; }
+  const doc = new DOMParser().parseFromString(text, "text/html");
+  return Array.from(doc.querySelectorAll(".result")).map(r => {
+    const a = r.querySelector("a.result__a");
+    const url = a?.href || "";
+    const display = url.split('/')[2] || url;
+    return {
+      title: a?.textContent?.trim() || "",
+      snippet: r.querySelector(".result__snippet")?.textContent?.trim() || "",
+      link: url,
+      image: `https://icons.duckduckgo.com/ip3/${display}.ico`
+    };
+  }).slice(0, perPage);
 }
 
-// ======= Build card HTML =======
 function buildCardHTML(r) {
   return `
     <img src="${escapeHtml(r.image)}" class="results-res-thumb" loading="lazy"/>
@@ -177,328 +122,98 @@ function buildCardHTML(r) {
       <h3>${escapeHtml(r.title)}</h3>
       <div class="results-res-desc">
         <p class="results-res-text">${escapeHtml(r.snippet)}</p>
-        <img src="${escapeHtml(r.image)}" class="results-res-mini" loading="lazy"/></img>
-        </div>
-<button onclick="showiframe(event)" class="fox-open-btn" data-url="${escapeHtml(r.link)}"></button>
-</div>
-  `;
+      </div>
+      <button onclick="showiframe(event)" class="fox-open-btn" data-url="${escapeHtml(r.link)}"></button>
+    </div>`;
 }
 
-// ======= Show search results =======
 async function showSearchResults(query, reset=false) {
-  if (!query) return;
+  if (!query || loading) return;
   currentQuery = query;
   const root = ensureResultsRoot();
   const grid = root.querySelector(".results-grid");
-  const titleEl = root.querySelector("#queryTitle");
-  if (titleEl) titleEl.textContent = query;
-  if (root) root.style.display = "block";
-
-  if (reset) {
-    nextPage = 0;
-    historyStack = [];
-    historyIndex = -1;
-    shownLinks.clear();
-    grid.innerHTML = "";
-  }
-
-  if (loading) return;
+  if (reset) { nextPage = 0; shownLinks.clear(); grid.innerHTML = ""; }
   loading = true;
-
   const results = await fetchResultsDDG(query, nextPage, 8);
-  const uniqueResults = results.filter(r => !shownLinks.has(r.link));
-  if (!uniqueResults.length && nextPage===0) {
-    grid.innerHTML = `<div class="results-empty">Brak wyników dla: ${escapeHtml(query)}</div>`;
-    loading = false;
-    return;
-  }
-
-  uniqueResults.forEach(r=>shownLinks.add(r.link));
-  historyStack.push(uniqueResults);
-  historyIndex = historyStack.length-1;
-  nextPage++;
-
-  grid.innerHTML = "";
-  uniqueResults.forEach(r=>{
+  results.filter(r => !shownLinks.has(r.link)).forEach(r => {
+    shownLinks.add(r.link);
     const card = document.createElement("div");
     card.className="results-res-card";
     card.innerHTML = buildCardHTML(r);
     grid.appendChild(card);
   });
-
-  loading=false;
+  root.style.display = "block";
+  nextPage++;
+  loading = false;
 }
 
-
-
-// ======= Scroll trigger behavior =======
+// ======= Obsługa Scroll Trigger =======
 function setupTrigger() {
   const trigger = document.querySelector(".scroll-trigger");
   if (!trigger) return;
-
-  let holdTimer = null;
-  const HOLD_TIME = 1000;
-
-  async function showNextResults() {
-    trigger.classList.remove("active");
-    if (!currentQuery || loading) return;
-    loading = true;
-
-    const grid = document.querySelector(".results-grid");
-    if (!grid) { loading = false; return; }
-
-    const results = await fetchResultsDDG(currentQuery, nextPage, 8);
-    const uniqueResults = results.filter(r => !shownLinks.has(r.link));
-    if (!uniqueResults.length) { loading = false; return; }
-
-    uniqueResults.forEach(r => shownLinks.add(r.link));
-    historyStack.push(uniqueResults);
-    historyIndex = historyStack.length - 1;
-    nextPage++;
-
-    uniqueResults.forEach(r => {
-      const card = document.createElement("div");
-      card.className = "results-res-card";
-      card.innerHTML = buildCardHTML(r);
-      grid.appendChild(card);
-    });
-
-    loading = false;
-  }
-
-function startHold() {
-  trigger.classList.add("active");
-  // Efekt "puchnięcia" przycisku podczas trzymania
-  trigger.style.transform = "scale(1.1)";
-  holdTimer = setTimeout(showNextResults, HOLD_TIME);
-}
-
-function cancelHold() {
-  clearTimeout(holdTimer);
-  trigger.classList.remove("active");
-  trigger.style.transform = "scale(1)"; // Powrót do normy
-}
-
-
+  let holdTimer;
+  const startHold = () => { trigger.classList.add("active"); holdTimer = setTimeout(() => showSearchResults(currentQuery), 1000); };
+  const cancelHold = () => { clearTimeout(holdTimer); trigger.classList.remove("active"); };
   trigger.addEventListener("mousedown", startHold);
   trigger.addEventListener("touchstart", startHold, { passive: true });
   window.addEventListener("mouseup", cancelHold);
   window.addEventListener("touchend", cancelHold);
 }
-
 document.addEventListener("DOMContentLoaded", setupTrigger);
 
-
-
-
-// ======= Suggestions =======
-async function fetchSuggestions(q){
-  if(!q) return [];
-  const target=`https://suggestqueries.google.com/complete/search?client=firefox&hl=${lang}&q=${encodeURIComponent(q)}`;
-  for(const proxy of proxies){
-    try{
-      const res=await fetch(proxy+encodeURIComponent(target),{cache:"no-store"});
-      if(!res||!res.ok) continue;
-      const txt=await res.text();
-      const parsed=JSON.parse(txt);
-      if(Array.isArray(parsed[1])) return parsed[1];
-    }catch{}
-  }
-  return [];
-}
-function clearSlots(){ selectedIndex=-1; resultsSlots.forEach(r=>{r.textContent=""; r.classList.remove("filled","active");}); }
-
-// ======= Input handlers =======
-input.addEventListener("input",()=>{
-  const q=input.value.trim(); selectedIndex=-1; if(!q) return clearSlots();
-  if(debounceTimer) clearTimeout(debounceTimer);
-// Znajdź miejsce, gdzie wypełniasz sloty sugestiami i zamień na to:
-debounceTimer = setTimeout(async () => {
-  const suggestions = await fetchSuggestions(q);
+// ======= Sugestie i Input =======
+input?.addEventListener("input", debounce(async () => {
+  const q = input.value.trim();
+  if (!q) return resultsSlots.forEach(s => s.classList.remove("filled"));
+  const target = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(q)}`;
+  const res = await fetchWithProxyText(target);
+  const suggestions = JSON.parse(res)?.[1] || [];
   resultsSlots.forEach((slot, i) => {
     if (suggestions[i]) {
       slot.textContent = suggestions[i];
       slot.classList.add("filled");
-      
-      // Reset animacji, aby przy każdym nowym znaku pola "drgały"
-      slot.style.animation = 'none';
-      slot.offsetHeight; // Trigger reflow
-      slot.style.animation = `hyperPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.04}s forwards`;
     } else {
-      slot.textContent = "";
-      slot.classList.remove("filled", "active");
-      slot.style.animation = 'none';
+      slot.classList.remove("filled");
     }
   });
-}, 200);
+}, 200));
+
+// ======= Nawigacja i Menu =======
+btn?.addEventListener("click", () => {
+  overlay.style.display = overlay.style.display === "flex" ? "none" : "flex";
+  if (overlay.style.display === "flex") { overlay.classList.add("show"); input.focus(); }
 });
 
-input.addEventListener("keydown",(e)=>{
-  const filled=resultsSlots.filter(r=>r.classList.contains("filled"));
-  if(!filled.length && e.key!=="Enter") return;
-  if(["ArrowDown","ArrowUp","Enter"].includes(e.key)) e.preventDefault();
-  if(e.key==="ArrowDown") selectedIndex=(selectedIndex+1)%filled.length;
-  else if(e.key==="ArrowUp") selectedIndex=(selectedIndex-1+filled.length)%filled.length;
-  else if(e.key==="Enter"){
-    const q=selectedIndex>=0 && filled[selectedIndex]?filled[selectedIndex].textContent:input.value.trim();
-    if(!q) return;
-    showSearchResults(q,true);
-  }
-  filled.forEach((r,i)=>r.classList.toggle("active",i===selectedIndex));
+dockBtn?.addEventListener("click", () => {
+  document.getElementById("dockMenu")?.classList.toggle("show");
 });
 
-resultsSlots.forEach(slot=>{
-  slot.addEventListener("click",()=>{
-    if(!slot.classList.contains("filled")) return;
-    showSearchResults(slot.textContent,true);
-  });
+homeBtn?.addEventListener("click", () => {
+  document.querySelector(".results-root").style.display = "none";
+  window.scrollTo({top: 0, behavior: "smooth"});
 });
 
-// ======= Overlay toggle =======
-btn.addEventListener("click",()=>{
-  if(overlay.style.display==="flex"){ overlay.classList.remove("show"); setTimeout(()=>overlay.style.display="none",300);}
-  else{ overlay.style.display="flex"; setTimeout(()=>overlay.classList.add("show"),10); input.focus(); input.select();}
-});
-overlay.addEventListener("click",(e)=>{ if(e.target===overlay){ overlay.classList.remove("show"); setTimeout(()=>overlay.style.display="none",300);} });
-input.addEventListener("keydown",(e)=>{ if(e.key==="Enter"){ e.preventDefault(); showSearchResults(input.value.trim(),true); }});
-
-// ======= Dock button =======
-dockBtn?.addEventListener("click",()=>{
-  dockBtn.classList.add("spin");
-  setTimeout(()=>dockBtn.classList.remove("spin"),400);
-  const dockMenu=document.getElementById("dockMenu");
-  if(dockMenu) dockMenu.classList.toggle("show");
-});
-
-// ======= Home button =======
-homeBtn?.addEventListener("click",()=>{
-  const root=document.querySelector(".results-root");
-  if(root) root.style.display="none";
-  overlay.style.display="none"; overlay.classList.remove("show");
-  input.value=""; clearSlots(); historyStack=[]; historyIndex=-1; shownLinks.clear(); nextPage=0;
-  const grid=root?.querySelector(".results-grid"); if(grid) grid.innerHTML="";
-  window.scrollTo({top:0,behavior:"smooth"});
-});
-
-// === SETTINGS TOGGLE ===
+// ======= Ustawienia (Bezpieczne) =======
 const settingsBtn = document.getElementById("settings-btn");
 const settingsOverlay = document.getElementById("settingsOverlay");
 
-settingsBtn.addEventListener("click", () => {
-  settingsOverlay.classList.add("show");
-});
+settingsBtn?.addEventListener("click", () => settingsOverlay?.classList.add("show"));
+settingsOverlay?.addEventListener("click", (e) => { if(e.target === settingsOverlay) settingsOverlay.classList.remove("show"); });
 
-settingsOverlay.addEventListener("click", (e) => {
-  if (e.target === settingsOverlay) {
-    settingsOverlay.classList.remove("show");
-  }
-});
-
-
-const closeLine = document.querySelector(".settings-close-line");
-let closeTimer = null;
-const CLOSE_HOLD = 200;
-
-function startCloseHold() {
-  closeTimer = setTimeout(() => {
-    const panel = document.querySelector(".settings-overlay");
-    if(panel) panel.classList.remove("show");
-  }, CLOSE_HOLD);
-}
-
-function cancelCloseHold() {
-  clearTimeout(closeTimer);
-}
-
-closeLine.addEventListener("mousedown", startCloseHold);
-closeLine.addEventListener("touchstart", startCloseHold, {passive:true});
-document.addEventListener("mouseup", cancelCloseHold);
-document.addEventListener("touchend", cancelCloseHold);
-
-
-
-const panel = document.querySelector('.settings-panel');
-const dots = document.querySelectorAll('.dot'); // zakładam, że tak się nazywają twoje przyciski
+const dots = document.querySelectorAll('.dot');
 dots.forEach((dot, i) => {
   dot.addEventListener('click', () => {
-    updateCategory(i); // pokaż odpowiedni layer
-  });
-});
-const layers = panel.querySelectorAll('.layer');
-
-dots.forEach(dot => {
-  dot.addEventListener('click', () => {
-    // dezaktywacja wszystkich dotów
     dots.forEach(d => d.classList.remove('active'));
-    // dezaktywacja wszystkich warstw
-    layers.forEach(l => l.classList.remove('active'));
-
-    // aktywacja klikniętej dot i warstwy
     dot.classList.add('active');
-    const layerName = dot.dataset.layer;
-    const layer = panel.querySelector(`.${layerName}`);
-    if (layer) {
-      layer.style.transition = 'opacity 0.3s ease';
-      layer.classList.add('active');
-    }
+    const layers = document.querySelectorAll('.layer');
+    layers.forEach(l => l.classList.remove('active'));
+    document.querySelector(`.${dot.dataset.layer}`)?.classList.add('active');
   });
 });
-
-
-
-const mainBtn = document.getElementById('variation_1btn');
-
-mainBtn.addEventListener('click', () => {
-  const layer = document.getElementById('variation_layer1');
-layer.parentElement.classList.add('active'); // włącza opacity i pointer-event
-  // Sprawdź, czy już istnieje linia i variations
-
-  if (!layer.querySelector('.line')) {
-    // Tworzymy linię
-    const line = document.createElement('div');
-    line.className = 'line';
-    layer.appendChild(line);
-
-    // Tworzymy kilka przełączników
-    const variations = [
-      { label: 'Opcja 1' },
-      { label: 'Opcja 2' },
-      { label: 'Opcja 3' }
-    ];
-
-    variations.forEach(v => {
-      const variation = document.createElement('div');
-      variation.className = 'variation';
-
-      const dot = document.createElement('div');
-      dot.className = 'variation-dot';
-
-      const label = document.createElement('span');
-      label.className = 'variation-label';
-      label.textContent = v.label;
-
-      variation.appendChild(dot);
-      variation.appendChild(label);
-
-      // Kliknięcie na przełącznik
-      variation.addEventListener('click', () => {
-        // reset wszystkich
-        layer.querySelectorAll('.variation-dot').forEach(d => d.classList.remove('active'));
-        dot.classList.add('active');
-      });
-
-      layer.appendChild(variation);
-    });
-  }
-});
-
 
 const toggle = document.querySelector('.toggle-knob');
-const settingsToggle = document.querySelector('.settings-toggle');
+toggle?.addEventListener('click', () => toggle.classList.toggle('active'));
 
-toggle?.addEventListener('click', () => {
-  toggle.classList.toggle('active');
-});
 
 function updateCategory(index) {
   // logika zmiany kategorii
