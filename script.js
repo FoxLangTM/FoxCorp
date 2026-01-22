@@ -516,7 +516,7 @@ function applyOptimizations(level) {
     gl.compileShader(shader);
     return shader;
   }
-}
+
 
 const perfRange = document.getElementById('perfRange3');
 const perfWrapper = document.querySelector('.performance-range-wrapper');
