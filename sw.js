@@ -4,7 +4,6 @@ const ASSETS = [
   '/index.html',
   '/style.css',
   '/script.js',
-  '/FoxCorp.png'
 ];
 
 self.addEventListener('install', (event) => {
