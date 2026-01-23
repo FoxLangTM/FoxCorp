@@ -360,6 +360,29 @@ document.addEventListener("click", (e) => {
 // ==================================//
 // 3. USTAWIENIA I WYDAJNOŚĆ
 // ==================================//
+
+const closeLine = document.querySelector(".settings-close-line");
+let closeTimer = null;
+const CLOSE_HOLD = 200;
+
+function startCloseHold() {
+  closeTimer = setTimeout(() => {
+    const panel = document.querySelector(".settings-overlay");
+    if(panel) panel.classList.remove("show");
+  }, CLOSE_HOLD);
+}
+
+function cancelCloseHold() {
+  clearTimeout(closeTimer);
+}
+
+closeLine.addEventListener("mousedown", startCloseHold);
+closeLine.addEventListener("touchstart", startCloseHold, {passive:true});
+document.addEventListener("mouseup", cancelCloseHold);
+document.addEventListener("touchend", cancelCloseHold);
+
+
+
 const settingsBtn = document.getElementById("settings-btn");
 const settingsOverlay = document.getElementById("settingsOverlay");
 
@@ -643,3 +666,4 @@ document.addEventListener("DOMContentLoaded", () => {
   if (action === 'search') setTimeout(() => document.getElementById('searchBtn')?.click(), 300);
   else if (action === 'settings') setTimeout(() => document.getElementById('settings-btn')?.click(), 300);
 });
+
