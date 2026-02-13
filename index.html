@@ -1,1038 +1,172 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
-        <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FoxNor</title>
+    <title>FoxCorp # Your own Fast Browser</title>
 
-    <meta name="description" content=Video Player, FoxNor | A working, stable video player for low-end devices, allowing you to watch any video from any platform, ad-free and for free. One of a kind; a minimalist YouTube video browser.
-We guarantee stability, speed, security, and no advertisers. Try it, you won't regret it, and you'll love the design.">
-    <meta name="keywords" content="FoxNor, YouTube video, Fast, Performance, Browser, Browsr, Design, Privacy, YouTube videos, FoxNor player, player, films, film, videos, video">
+    <meta name="description" content="FoxCorp | A browser with exceptional taste, focused on performance, design, and features.">
+    <meta name="keywords" content="FoxCorp, Browser, Fast Browser, Performance, UI Design, Privacy">
     <meta name="robots" content="index, follow">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://foxnor.foxlang-team.workers.dev/">
-    <meta name="theme-color" content="#32639b"> <meta property="og:site_name" content="FoxNor Player">
-    <meta property="og:title" content="FoxNor | One of a kind; a minimalist YouTube video browser">
-    <meta property="og:description" content="Video Player, FoxNor | A working, stable video player for low-end devices, allowing you to watch any video from any platform, ad-free and for free. One of a kind; a minimalist YouTube video browser.
-We guarantee stability, speed, security, and no advertisers. Try it, you won't regret it, and you'll love the design.">
-    <meta property="og:image" content="/FoxNor.png">
+    <meta property="og:url" content="https://foxcorp.pages.dev/">
+    <meta property="og:title" content="FoxCorp # Your own Fast Browser">
+    <meta property="og:description" content="Exceptional taste, focused on performance and design.">
+    <meta property="og:image" content="/FoxCorp.png">
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="FoxNor | One of a kind; a minimalist YouTube video browser">
+    <meta property="twitter:title" content="FoxCorp # Your own Fast Browser">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self'; 
+    script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; 
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; 
+    img-src 'self' data: https:; 
+    font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; 
+    connect-src 'self' https://corsproxy.io https://api.allorigins.win https://thingproxy.freeboard.io https://suggestqueries.google.com https://api.mymemory.translated.net https://cloudflareinsights.com; 
+    frame-src 'self' https:; 
+    object-src 'none'; 
+    base-uri 'self'; 
+    form-action 'self'; 
+    upgrade-insecure-requests;">
 
-    <link rel="canonical" href="https://foxnor.foxlang-team.workers.dev/">
+
+    <link rel="canonical" href="https://foxcorp.pages.dev/">
     <link rel="icon" href="Images/favicon.ico" sizes="any">
     <link rel="stylesheet" href="style.css">
-    <link rel="apple-touch-icon" sizes="180x180" href="Images/FoxNor.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="Images/FoxNor-192.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="Images/FoxNor-512.png">
-    <link rel="apple-touch-icon" href="Images/FoxNor.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/FoxCorp.png">
     <link rel="manifest" href="/manifest.json">
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data:; style-src * 'unsafe-inline'; frame-src *;">
-    
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "FoxNor",
-  "operatingSystem": "Android, Windows, iOS",
-  "applicationCategory": "MultimediaApplication",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "description": "Minimalist ad-free video player for low-end devices."
-}
-</script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@700&family=Red+Hat+Display:wght@300;500&family=Saira:wght@700&display=swap" rel="stylesheet">
 
-    <style>
-        :root { --player-dynamic-color: #1a1a1a; }
-        
-        body {
-            background: linear-gradient(to bottom, var(--player-dynamic-color) 0%, #1A1B20 45%);
-            background-attachment: fixed; color: white; margin: 0;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; font-family: 'Red Hat Display', sans-serif;
-            transition: background 1.5s ease; user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            animation: player-gradientMove 10s ease infinite;
-            flex-direction: column;
-        }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@700&family=Red+Hat+Display:wght@300&family=Share+Tech&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-        @keyframes player-gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-               .player-up-container {
-            width: 70%;
-            position: absolute;
-            font-family: sans-serif;
-            left: 4%;
-            top: 2%;
-            height: 28.5px;
-            justify-content: left;
-            align-items: left;
-            color: #8F8F8F;
-            font-size: 13px;
-            letter-spacing: 1px;
-            background: rgba(15, 15, 15);
-            border-radius: 28px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-            display: flex;
-            padding: 5px;
-            z-index: 1019;
-            overflow: hidden;
-            margin-right: auto;
-        }
-        
-        .player-up-container::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: #EB0404;
-    border-radius: 50%;
-    margin-right: 10px;
-    margin-up: 10px;
-    box-shadow: 0 0 5px #EB0404;
-}
-
-        .player-up-container span {
-            transform: translateY(15%);
-            color: #888;
-            font-weight: 300;
-            font-variant-numeric: tabular-nums; /* Zapobiega "skakaniu" cyfr */
-            text-shadow: 0 0 5px rgba(0,0,0,0.8);
-        }
-        
-        .player-up-container-btn {
-            right: 0;
-            position: fixed;
-            font-family: sans-serif;
-            right: 9.5%;
-            top: 2%;
-            height: 35px;
-            width: 35px;
-            color: rgba(255, 255, 255, 0.9);
-            background: rgba(2, 2, 2);
-            border-radius: 28px;
-            border: 2px solid #2F3136;
-            z-index: 1020;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .player-up-container-btn:hover {
-          animation: player-up-container-btn 1.5s forwards;
-        }
-        
-        @keyframes player-up-container-btn {
-            0% {
-               top: 2%;
-               border-radius: 25px;
-            }
-            20% {
-               border-radius: 25px 25px 17px 17px;
-               top: 3%;
-               rotate: 180deg;
-         }
-            30% {
-               border-radius: 20px 20px 10px 10px;
-               top: 4%;
-               rotate: 270deg;
-             }
-            50% {
-               border-radius: 45px 45px 30px 17px;
-               width: 34px;
-               height: 23px;
-               top: 5%;
-               rotate: 360deg;
-               border: none;
-            }
-            70% {
-               border-radius: 35px 35px 25px 17px;
-               width: 34px;
-               top: 5%;
-               rotate: 70deg;
-            }
-        }
-
-        /* Główny kontener */
-        .player-container {
-            box-shadow: 0 5px 25px 5px rgba(15, 15, 15); 
-            position: fixed;
-            width: 90%; max-width: 800px; max-height: 95vh; background-color: #141414;
-            backdrop-filter: blur(10px); padding: 10px; border-radius: 35px;
-            transition: all 0.3s ease, box-shadow 2s ease-in-out;
-            transform: translateY(20px);
-            animation: player-revealPlayer 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards, 
-                       player-container-pulse 4s ease-in-out infinite;
-        }
-        
-                .player-down-container {
-            bottom: 0;
-            width: 90%;
-            position: relative;
-            height: 130px;
-            max-height: 85vh;
-            color: rgba(255, 255, 255, 0.9);
-            background: #121212;
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px 20px 0 0;
-            border: 2px solid #2F3136;
-            border-bottom: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            padding: 5px;
-            text-align: center;
-            transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                max-height 0.4s ease, 
-                background 0.3s ease;
-            z-index: 1000;
-            overflow: hidden;
-            margin-top: auto;
-        }
-        
-        .drag-handle {
-    width: 45px;
-    height: 4px;
-    background: rgba(150, 150, 150, 0.2);
-    border-radius: 25px;
-    margin-top: 5px;
-    transition: margin-left 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s;
-}
-        
-        .player-down-container:hover {
-    transform: translateY(0);
-    min-height: 65.7vh;
-}
-.player-down-container.is-active {
-    transform: translateY(0);
-    min-height: 65.7vh;
-}
-
-.player-down-container.is-active .drag-handle {
-    margin-left: 70%;
-}
-
-        @keyframes player-revealPlayer {
-            to { transform: translateY(0); }
-        }
-
-        /* Fullscreen Logic */
-        .player-container:fullscreen { width: 100vw; max-width: 100vw; height: 100vh; border-radius: 0; padding: 0; display: flex; flex-direction: column; justify-content: center; background: #000; }
-        .player-container:fullscreen .player-video-wrapper { width: 100%; border-radius: 0; margin: 0; flex-grow: 1; }
-
-        /* Nagłówek */
-        header { display: flex; align-items: center; margin-bottom: 3px; padding: 0 10px; }
-        .player-logo-img { width: 28px; height: 28px; margin-right: 15px; filter: invert(1); opacity: 0.8; transform: scale(1.8);}
-        .player-app-name { font-family: 'Saira', sans-serif; font-size: 22px; font-weight: 700; }
-        
-        .player-video-title-box {
-            flex-grow: 1;
-            background: rgba(52, 78, 109, 0.4);
-            margin-left: 20px;
-            padding: 2px 15px;
-            border-radius: 12px;
-            font-size: 12px;
-            color: #aaa;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Wrapper Wideo */
-        .player-video-wrapper { transform: translateX(-1px); cursor: none; position: relative; width: 90vw; aspect-ratio: 2010/1136; border-radius: 17.5px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.4);}
-        
-        .player-custom-cursor {
-            width: 8px; height: 8px;
-            background: #fff; border-radius: 50%;
-            position: fixed; 
-            pointer-events: none; z-index: 99999;
-            mix-blend-mode: difference; 
-            transition: transform 0.2s, opacity 0.3s ease;
-            opacity: 0;
-            transform: translate(-50%, -50%);
-            will-change: left, top;
-        }
-
-        /* Iframe na spodzie */
-        #player-main-iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, #1D1D1D 50%, #282828 50%); border: none; z-index: 1; }
-        
-        /* STREFY GESTÓW */
-        .player-gesture-zone { position: absolute; top: 0; height: 100%; width: 25%; z-index: 10; cursor: ns-resize; }
-        #player-zone-left { left: 0; }
-        #player-zone-right { right: 0; }
-
-        /* Ochrona Wzroku */
-        #player-brightness-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; opacity: 0; pointer-events: none; z-index: 5; }
-
-        /* Feedback wizualny gestów */
-        .player-gesture-indicator { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8); padding: 20px 30px; border-radius: 40px; 
-            display: none; flex-direction: column; align-items: center; gap: 10px; z-index: 30; pointer-events: none; 
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .player-indicator-bar { width: 100px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 10px; }
-        .player-indicator-fill { height: 100%; background: #fff; width: 0%; border-radius: 2px; }
-
-        /* Pasek kontrolny */
-        .player-controls-bar {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 55px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.95)); 
-            display: flex; align-items: center; padding: 0 20px; box-sizing: border-box; z-index: 20;
-        }
-        .player-control-icon { color: #fff; font-size: 16px; cursor: pointer; margin-left: 18px; opacity: 0.6; transition: 0.2s; }
-        .player-control-icon:hover { opacity: 1; transform: scale(1.1); }
-        
-        .player-progress-container { 
-            flex-grow: 1; height: 3px; background: rgba(255,255,255,0.08); 
-            margin: 0 15px; cursor: pointer; border-radius: 2px; 
-            position: relative; overflow: hidden; transition: height 0.2s;
-        }
-        .player-progress-container:hover { height: 6px; }
-
-        .player-progress-buffer { 
-            position: absolute; top: 0; left: 0; height: 100%; width: 0%; 
-            background: rgba(255,255,255,0.15); border-radius: 2px; transition: width 0.4s; 
-        }
-
-        .player-progress-fill { 
-            position: absolute; top: 0; left: 0; height: 100%; width: 0%; 
-            background: var(--player-dynamic-color); border-radius: 2px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
-            transition: width 0.2s linear;
-        }
-
-        #player-btn-play {
-            position: relative;
-            overflow: hidden;
-        }
-
-        #player-btn-play.fa-play::after {
-            content: ''";
-            position: absolute;
-            top: -50%; left: -150%;
-            width: 50%; height: 200%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transform: rotate(25deg);
-            animation: player-shine 3s infinite;
-        }
-
-        @keyframes player-shine {
-            to { left: 150%; }
-        }
-
-        /* Info & Opis */
-        .player-info-section { display: flex; gap: 15px; overflow-y: auto; flex-shrink: 1; padding: 7px 5px; align-items: flex-start; }
-        .player-avatar { width: 45px; height: 45px; border-radius: 25px; background-size: cover; flex-shrink: 0; transition: border 1s; }
-        .player-content { flex-grow: 1; }
-        .player-video-real-title { font-size: 13px; color: #555; font-weight: 500; }
-        
-        .player-avatar {
-            opacity: 0;
-            transition: opacity 0.8s ease, border 1s;
-            background-position: center;
-        }
-        .player-avatar.player-loaded {
-            opacity: 1;
-        }
-
-        /* Avatar Viz */
-        .player-avatar-viz {
-            position: relative;
-            width: 45px;
-            height: 45px;
-            border: none;
-            left: 2px;
-            flex-shrink: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center; 
-            --player-local-dynamic-color: var(--player-dynamic-color, #ffffff);
-        }
-
-        /* System kolców */
-        .player-spike-system {
-            position: absolute;
-            width: 45px;
-            height: 45px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            animation: player-rotate-all 20s linear infinite;
-            opacity: 0; 
-            transition: opacity 0.5s ease;
-            pointer-events: none;
-        }
-
-        .player-avatar.player-playing + .player-spike-system {
-            opacity: 1;
-        }
-
-        @keyframes player-spike-anim {
-            0% { 
-                transform: rotate(var(--angle)) translateY(-25px) scaleY(0.4); 
-                opacity: 0.5; 
-            }
-            100% { 
-                transform: rotate(var(--angle)) translateY(-25px) scaleY(1.3); 
-                opacity: 1; 
-            }
-        }
-
-        .player-spike {
-            position: absolute;
-            width: 2px;
-            height: 3px;
-            bottom: 50%;
-            transform-origin: bottom center;
-            filter: blur(0.5px);
-            border-radius: 1px;
-            background-color: #2e2e2e;
-            box-shadow: 0 0 8px hsl(0, 70%, 7%);
-            animation: 
-                player-spike-anim 0.8s ease-in-out infinite alternate,
-                player-color-cycle 20s linear infinite;
-            animation-play-state: paused;
-        }
-
-        .player-avatar.player-playing + .player-spike-system .player-spike {
-            animation-play-state: running;
-        }
-
-        @keyframes player-color-cycle {
-            0% { 
-                background-color: hsl(var(--hue), 80%, 40%); 
-                filter: hue-rotate(0deg); 
-                box-shadow: 0 0 12px hsl(var(--hue), 80%, 40%);
-            }
-            10% { background-color: hsl(0, 70%, 25%); filter: hue-rotate(15deg); }
-            20% { filter: hue-rotate(30deg); }
-            30% { filter: hue-rotate(50deg); }
-            40% { filter: hue-rotate(110deg); }
-            50% { filter: hue-rotate(180deg); }
-            60% { filter: hue-rotate(220deg); }
-            80% { filter: hue-rotate(240deg); }
-            100% { 
-                background-color: hsl(var(--hue), 80%, 40%); 
-                filter: hue-rotate(720deg); 
-                box-shadow: 0 0 12px hsl(var(--hue), 80%, 40%);
-            }
-        }
-
-        @keyframes player-rotate-all {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .player-description-area { margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; display: none; font-size: 12px; color: #888; line-height: 1.6; }
-        .player-description-area.player-active { display: block; }
-        .player-more-btn { background: none; padding: 5px 12px; display: inline-block; z-index: 11; margin-top: 5px; border: none; color: #444; cursor: pointer; font-size: 11px; font-weight: bold; margin-top: 8px; padding: 0; transition: 0.2s; }
-        .player-more-btn:hover { color: #888; }
-        
-        .player-description-area.player-active {
-    display: block;
-    /* 1. Limit wysokości dla ok. 5 linijek (zakładając line-height 1.6) */
-    max-width: 80%; max-height: 270px; 
-    overflow-y: auto; /* Włączamy scroll tylko wewnątrz opisu */
-    padding-right: 5px; /* Miejsce na scrollbar */
-    
-    /* Stylowy, minimalistyczny scrollbar dla ochrony wzroku */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.2) transparent;
-}
-
-.player-description-area.player-active::-webkit-scrollbar {
-    width: 3px;
-}
-.player-description-area.player-active::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.2);
-    border-radius: 10px;
-}
-    </style>
-</head>
-<body>
-<div id="player-cursor" class="player-custom-cursor"></div>
-
-<div class="player-up-container" id="player-up-container">
-<span>00:00:00</span></div>
-<div class="player-up-container-btn" id="player-up-containe-btn"><i class="fa-solid fa-film" style="color: var(--player-dynamic-color); transform: translateY(9px);"></i></div>
-<div class="player-container" id="player-foxnor-container">
-    <header>
-        <img src="https://raw.githubusercontent.com/FoxLangTM/LuxurySearchBar.Code/refs/heads/main/Images/foxnor2.png" alt="Logo" class="player-logo-img">
-        <span class="player-app-name">foxnor</span>
-        <div id="player-search-title" class="player-video-title-box">⌕ Searching videos</div>
-    </header>
-
-    <div class="player-video-wrapper" id="player-v-wrapper">
-        <div id="player-main-iframe"></div>
-
-        <div class="player-gesture-zone" id="player-zone-left" style="z-index:20;"></div>
-        <div class="player-gesture-zone" id="player-zone-right" style="z-index:20;"></div>
-        
-        <div id="player-brightness-overlay"></div>
-        
-        <div id="player-indicator" class="player-gesture-indicator">
-            <i id="player-indicator-icon" class="fas fa-volume-up"></i>
-            <div class="player-indicator-bar"><div id="player-indicator-fill" class="player-indicator-fill"></div></div>
-        </div>
-
-        <div class="player-controls-bar">
-            <i class="fas fa-play" id="player-btn-play" style="color: var(--player-dynamic-color);" onclick="foxnorPlayer.togglePlay()" style="cursor:pointer"></i>
-            <div class="player-progress-container" onclick="foxnorPlayer.seek(event)">
-                <div class="player-progress-buffer" id="player-buffer-bar"></div>
-                <div class="player-progress-fill" id="player-progress-bar"></div>
-                <span id="player-time-remaining" style="position:absolute; right:10px; top:-18px; font-size:10px; color:#888; font-family:monospace;">-0:00</span>
-            </div>
-            <i class="fas fa-cog player-control-icon" style="color: #B3B3B3;"title="Ustawienia" onclick="alert('Not now...')"></i>
-            <i class="fas fa-external-link-alt player-control-icon" style="color: #B3B3B3;" title="PiP Mode" onclick="foxnorPlayer.togglePiP()"></i>
-            <i class="fas fa-expand player-control-icon" style="color: #B3B3B3; title="Pełny ekran" onclick="foxnorPlayer.toggleFullscreen()"></i>
-        </div>
-    </div>
-
-    <div class="player-info-section">
-        <div class="player-avatar-viz">
-            <div id="player-dynamic-avatar" class="player-avatar"></div>
-            <div class="player-spike-system" id="player-spike-system"></div>
-        </div>
-        <div class="player-content">
-            <strong id="player-video-main-title" class="player-video-real-title">...</strong>
-            <button class="player-more-btn" onclick="foxnorPlayer.toggleDescription()">⌵ show more</button>
-            <div id="dynamic-btn-container"></div>
-        </div>
-    </div>
-</div>
-
-<div class="player-down-container" id="player-down-container">
-      <div class="drag-handle"></div>
-                  <div id="player-video-desc" class="player-description-area">
-Not now...            </div>
-</div>
-
-<img id="player-color-ref" crossorigin="anonymous" style="display:none">
-<script>
-// --- GLOBALNY OBIEKT "foxnorPlayer" (Namespace) ---
-// Wszystkie funkcje i zmienne są teraz właściwościami tego obiektu
-const foxnorPlayer = {
-    // --- KONFIGURACJA ---
-    config: {
-        getVideoId: function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const proxyId = urlParams.get('proxy'); // Szuka parametru ?proxy=
-            return proxyId ? proxyId : 'KDCOrufl7Is';
-        },
-        dom: {
-            overlay: null,
-            indicator: null,
-            fill: null,
-            icon: null,
-            title: null
-        }
-    },
-    
-    // --- ZMIENNE STANU ---
-    state: {
-        ytInstance: null,
-        rAF_ID: null,
-        startY: 0,
-        startVal: 0,
-        currentBrightness: 0,
-        lastTap: 0,
-        hideTimeout: null,
-        cursorTimeout: null,
-        touchStartY: 0
-    },
-
-    // --- NARZĘDZIA ZEWNĘTRZNE ---
-    tools: {
-        colorThief: new ColorThief()
-    },
-
-    // --- INICJALIZACJA ---
-    init: function() {
-        // Cache DOM elements
-        this.config.dom.overlay = document.getElementById('player-brightness-overlay');
-        this.config.dom.indicator = document.getElementById('player-indicator');
-        this.config.dom.fill = document.getElementById('player-indicator-fill');
-        this.config.dom.icon = document.getElementById('player-indicator-icon');
-        this.config.dom.title = document.getElementById('player-search-title');
-
-        // Visibility API Listener
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                cancelAnimationFrame(this.state.rAF_ID);
-                this.config.dom.title.innerText = `⌕ Foxnor - Background Mode Active`;
-            } else {
-                this.updateProgress();
-                this.fetchOEmbed();
-            }
-        });
-
-        // Setup Cursor
-        this.setupCursor();
-        
-        // Setup Spikes
-        this.createSpikes();
-
-        // Setup Hover Title
-        this.setupHoverTitle();
-        
-        // Setup Down Container Panel
-        this.setupDownPanelGestures();
-        
-        // Setup Down Container Resize
-        window.addEventListener('resize', () => this.adjustPanelHeight());
-    },
-
-    // --- LOGIKA YOUTUBE ---
-    onYouTubeReady: function(e) {
-        if (navigator.connection) {
-            const speed = navigator.connection.downlink;
-            if (speed < 2) {
-                this.state.ytInstance.setPlaybackQuality('medium');
-            } else {
-                this.state.ytInstance.setPlaybackQuality('highres');
-            }
-        }
-        
-        const frame = e.target.getIframe();
-        frame.removeAttribute('allow');
-        frame.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
-
-        this.fetchOEmbed(); 
-        this.updateProgress();
-        this.setupGestures(); 
-    },
-
-    onPlayerStateChange: function(event) {
-        const playBtn = document.getElementById('player-btn-play');
-        const avatar = document.getElementById('player-dynamic-avatar');
-
-        if (event.data === 1) { // PLAYING
-            playBtn.className = 'fas fa-pause';
-            avatar.classList.add('player-playing');
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
-        } else if (event.data === 2) { // PAUSED
-            playBtn.className = 'fas fa-play';
-            avatar.classList.remove('player-playing');
-            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
-        }
-    },
-
-    // --- STEROWANIE ---
-    togglePlay: function() {
-        const icon = document.createElement('i');
-        icon.style.cssText = "position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:50px; opacity:0.8; z-index:100; pointer-events:none; transition: all 0.5s;";
-        
-        if (this.state.ytInstance.getPlayerState() === 1) {
-            this.state.ytInstance.pauseVideo();
-            icon.className = 'fas fa-pause';
-        } else {
-            this.state.ytInstance.playVideo();
-            icon.className = 'fas fa-play';
-        }
-        
-        document.querySelector('.player-video-wrapper').appendChild(icon);
-        setTimeout(() => { 
-            icon.style.transform = "translate(-50%, -50%) scale(1.5)"; 
-            icon.style.opacity = "0"; 
-            setTimeout(() => icon.remove(), 500);
-        }, 10);
-    },
-
-    seek: function(event) {
-        const rect = event.currentTarget.getBoundingClientRect();
-        const pos = (event.clientX - rect.left) / rect.width;
-        this.state.ytInstance.seekTo(pos * this.state.ytInstance.getDuration());
-    },
-
-    toggleFullscreen: function() {
-        const elem = document.getElementById('player-foxnor-container');
-        if (!document.fullscreenElement) elem.requestFullscreen();
-        else document.exitFullscreen();
-    },
-    
-    togglePiP: async function() {
-    try {
-        const videoWrapper = document.getElementById('player-v-wrapper');
-        
-        if (document.pictureInPictureElement) {
-            await document.exitPictureInPicture();
-        } else if (document.pictureInPictureEnabled) {
-            // Uwaga: Niektóre przeglądarki wymagają tagu <video>. 
-            // Jeśli iframe blokuje dostęp, wyświetlimy komunikat biznesowy.
-            const video = document.querySelector('video'); 
-            if (video) {
-                await video.requestPictureInPicture();
-            } else {
-                alert("PiP jest ograniczony przez politykę odtwarzacza zewnętrznego. Użyj trybu pełnoekranowego.");
-            }
-        }
-    } catch (error) {
-        console.error("Błąd PiP:", error);
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "FoxCorp Browser",
+      "operatingSystem": "Web",
+      "applicationCategory": "BrowserApplication",
+      "description": "High performance web browser interface."
     }
-},
+    </script>
+</head>
 
-    toggleDescription: function() {
-        const area = document.getElementById('player-video-desc');
-        const downPanel = document.getElementById('player-down-container');
-        const mainBtn = document.querySelector('.player-content .player-more-btn');
-        const dynamicContainer = document.getElementById('dynamic-btn-container');
-        
-        // Przełączamy klasę aktywności opisu
-        const isActive = area.classList.toggle('player-active');
-        
-        if (isActive) {
-            // ROZWINIĘTE: Otwieramy też cały panel dolny, żeby opis był widoczny
-            downPanel.classList.add('is-active');
-            mainBtn.style.display = 'none'; // Chowamy "show more" pod tytułem
-            
-            // Wstrzykujemy "show less" do kontenera w górnej części
-            dynamicContainer.innerHTML = `
-                <button class="player-more-btn" onclick="foxnorPlayer.toggleDescription()">︽ show less</button>
-            `;
-        } else {
-            // ZWINIĘTE: Zamykamy panel i przywracamy stan pierwotny
-            downPanel.classList.remove('is-active');
-            mainBtn.style.display = 'block';
-            dynamicContainer.innerHTML = '';
-            area.scrollTop = 0; // Ochrona wzroku
-        }
-    },
+<body>
+    <a href="#main-content" class="skip-link" style="position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden;">Skip to main content</a>
 
-    // --- GESTY ---
-    setupGestures: function() {
-        const left = document.getElementById('player-zone-left');
-        const right = document.getElementById('player-zone-right');
+    <h1 class="visually-hidden" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">FoxCorp Browser Performance Interface</h1>
 
-        const handleStart = (e, type) => {
-            this.state.startY = e.touches[0].clientY;
-            this.state.startVal = (type === 'volume') ? this.state.ytInstance.getVolume() : this.state.currentBrightness;
-        };
+    <main id="main-content">
 
-        const handleMove = (e, type) => {
-            const deltaY = this.state.startY - e.touches[0].clientY;
-            this.config.dom.indicator.style.display = 'flex';
+        <div id="iframed" class="iframed hidden">
+            <div class="iframe-controls">
+                <div class="iframe-kill" onclick="hideIframe()" role="button" aria-label="Close window"></div>
+                <div class="iframe-resize" onclick="toggleResize()" role="button" aria-label="Toggle resize"></div>
+                <div class="iframe-minimize" onclick="toggleMinimize()" role="button" aria-label="Minimize"></div>
+                <button class="fox-pin-btn" onclick="pinCurrentProcess()" title="Add-process" aria-label="Add process"><span style="font-size: 14px;">❖</span></button>
+                <div class="iframe-fullscreen" onclick="toggleFullScreen()" role="button" aria-label="Full screen"><span style="font-size: 10px; color: white; pointer-events: none;"><i class="fa-solid fa-expand"></i></span></div>
+            </div>
 
-            if (type === 'volume') {
-                let newVal = Math.min(100, Math.max(0, this.state.startVal + deltaY * 0.4));
-                this.state.ytInstance.setVolume(newVal);
-                
-                if (newVal === 0) this.config.dom.icon.className = 'fas fa-volume-mute';
-                else if (newVal < 30) this.config.dom.icon.className = 'fas fa-volume-off';
-                else if (newVal < 70) this.config.dom.icon.className = 'fas fa-volume-down';
-                else this.config.dom.icon.className = 'fas fa-volume-up';
-                
-                this.config.dom.fill.style.width = newVal + '%';
-            } 
-            else if (type === 'bright') {
-                let brightnessScale = Math.min(0.9, Math.max(0, this.state.startVal - deltaY * 0.005));
-                document.getElementById('player-brightness-overlay').style.opacity = brightnessScale;
-                
-                this.config.dom.icon.className = brightnessScale > 0.5 ? 'fas fa-moon' : 'fas fa-sun';
-                this.config.dom.fill.style.width = (100 - (brightnessScale * 100)) + '%';
-            }
-        };
+            <iframe class="iframe"
+                id="mainIframe"
+                title="FoxCorp Browser Engine Content"
+                src=""
+                sandbox="allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+                loading="eager">
+            </iframe>
+        </div>
 
-        left.addEventListener('touchstart', (e) => handleStart(e, 'bright'));
-        left.addEventListener('touchmove', (e) => { e.preventDefault(); handleMove(e, 'bright'); }, {passive: false});
-        left.addEventListener('touchend', () => { 
-            this.config.dom.indicator.style.display = 'none'; 
-            this.state.currentBrightness = parseFloat(document.getElementById('player-brightness-overlay').style.opacity) || 0;
-        });
+        <div class="search-button" id="searchBtn" role="button" aria-label="Open search"><span>⌕</span></div>    
 
-        right.addEventListener('touchstart', (e) => handleStart(e, 'volume'));
-        right.addEventListener('touchmove', (e) => { e.preventDefault(); handleMove(e, 'volume'); }, {passive: false});
-        right.addEventListener('touchend', () => this.config.dom.indicator.style.display = 'none');
+        <div class="overlay" id="overlay">  
+            <div class="search-menu" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="results-listbox">  
+                <div class="search-bar">  
+                    <input id="searchInput" type="text" placeholder="" aria-label="Search field">  
+                </div>  
+                <div id="results-listbox" role="listbox">
+                    <div class="result" data-index="0" role="option"></div>  
+                    <div class="result" data-index="1" role="option"></div>  
+                    <div class="result" data-index="2" role="option"></div>  
+                    <div class="result" data-index="3" role="option"></div>  
+                </div>
+            </div>  
+        </div>    
 
-        // Tap to Seek Logic (Double Tap ish)
-        document.querySelector('.player-video-wrapper').addEventListener('touchend', (e) => {
-            const currentTime = new Date().getTime();
-            const tapLength = currentTime - this.state.lastTap;
-            if (tapLength < 300 && tapLength > 0) {
-                const x = e.changedTouches[0].clientX;
-                const width = window.innerWidth;
-                if (x < width / 2) this.state.ytInstance.seekTo(this.state.ytInstance.getCurrentTime() - 12);
-                else this.state.ytInstance.seekTo(this.state.ytInstance.getCurrentTime() + 12);
-            }
-            this.state.lastTap = currentTime;
-        });
-    },
+        <div class="results-root" style="display:none;" aria-live="polite">  
+            <div class="results-header">  
+                <h2 id="queryTitle"></h2>  
+            </div>  
+            <div class="results-container">  
+                <div class="results-grid"></div>  
+            </div>  
+            <div class="scroll-trigger" role="button" aria-label="Load more results">  
+                <div class="trigger-dot"></div>  
+            </div>
+        </div>    
+    </main>
 
-    // --- POBIERANIE DANYCH ---
-    fetchOEmbed: function() {
-        fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${this.config.videoId}`)
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('player-video-main-title').innerText = data.title;
-                this.config.dom.title.innerText = `⌕ ${data.author_name} • ${data.title}`;
-                
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.metadata = new MediaMetadata({
-                        title: data.title,
-                        artist: data.author_name,
-                        album: 'Foxnor Player',
-                        artwork: [
-                            { src: `https://img.youtube.com/vi/${this.config.videoId}/maxresdefault.jpg`, sizes: '1280x720', type: 'image/jpeg' },
-                            { src: `https://img.youtube.com/vi/${this.config.videoId}/hqdefault.jpg`, sizes: '480x360', type: 'image/jpeg' }
-                        ]
-                    });
-                    this.setupMediaActions();
-                }
-                
-                setTimeout(() => {
-                    const img = document.getElementById('player-color-ref');
-                    img.crossOrigin = "Anonymous";
-                    img.src = `https://img.youtube.com/vi/${this.config.videoId}/hqdefault.jpg`;
-                    
-                    img.onload = () => {
-                        const color = this.tools.colorThief.getColor(img);
-                        const r = color[0], g = color[1], b = color[2];
-                        
-                        const dynamicColor = `rgb(${r}, ${g}, ${b})`;
-                        document.documentElement.style.setProperty('--player-dynamic-color', dynamicColor);
-                        document.body.style.backgroundSize = "200% 200%";
-                        
-                        const avatarDiv = document.getElementById('player-dynamic-avatar');
-                        if (avatarDiv) {
-                            avatarDiv.style.borderColor = `rgb(${r}, ${g}, ${b})`;
-                        }
+    <section class="settings-overlay" id="settingsOverlay" aria-label="Settings Menu">  
+        <div class="settings-panel">  
+            <div class="settings-close-line" role="button" aria-label="Close settings"></div>  
+            <div class="dot-container">  
+                <div class="dot" data-layer="layer1" role="button" aria-label="General Settings">  
+                    <img src="https://pic.onlinewebfonts.com/thumbnails/icons_154090.svg" alt="">  
+                </div>  
+                <div class="dot" data-layer="layer2" role="button" aria-label="Interface Settings">  
+                    <img src="https://pic.onlinewebfonts.com/thumbnails/icons_580175.svg" alt="">  
+                </div>  
+                <div class="dot" data-layer="layer3" role="button" aria-label="Performance Settings">  
+                    <img src="https://pic.onlinewebfonts.com/thumbnails/icons_374986.svg" alt="">  
+                </div>  
+            </div>  
 
-                        const urlParts = data.author_url.split('/');
-                        const handle = urlParts[urlParts.length - 1].replace('@', '');
-                        const avatarImg = new Image();
-                        avatarImg.src = `https://unavatar.io/youtube/${handle}`;
-                        avatarImg.onload = () => {
-                            avatarDiv.style.backgroundImage = `url('${avatarImg.src}')`;
-                            avatarDiv.classList.add('player-loaded');
-                        };
-                    };
-                }, 1000);
-            })
-            .catch(err => console.error("Player Business Error:", err));
-    },
+            <div class="settings-toggle" id="toggle1">
+                <div class="toggle-knob" role="switch" aria-checked="false" aria-label="Experimental mode"></div>  
+                <span class="toggle-label">Experimental Mode</span>  
+            </div>  
 
-    setupMediaActions: function() {
-        const actions = [
-            ['play', () => { this.state.ytInstance.playVideo(); }],
-            ['pause', () => { this.state.ytInstance.pauseVideo(); }],
-            ['seekbackward', () => { this.state.ytInstance.seekTo(this.state.ytInstance.getCurrentTime() - 10); }],
-            ['seekforward', () => { this.state.ytInstance.seekTo(this.state.ytInstance.getCurrentTime() + 10); }],
-            ['stop', () => { this.state.ytInstance.stopVideo(); }]
-        ];
+            <div id="variation_layer3" class="performance-control">
+                <div class="performance-label">\Performance ∆\</div>
+                <div class="performance-range-wrapper">
+                    <input type="range" id="perfRange3" min="0" max="100" value="0" step="50" aria-label="Performance optimization level">
+                </div>
+                <div class="performance-scale">
+                    <span>Low End</span><span>Balanced</span><span>Full End</span>
+                </div>
+                <div class="performance-emojis">
+                    <span role="img" aria-label="Performance level low">💢</span>
+                    <span role="img" aria-label="Performance level medium">🔆</span>
+                    <span role="img" aria-label="Performance level high">✨</span>
+                </div>
+            </div>  
+        </div>  
+    </section>
 
-        for (const [action, handler] of actions) {
-            try { navigator.mediaSession.setActionHandler(action, handler); } catch (error) {}
-        }
-    },
+    <section id="cardsOverlay" class="settings-overlay" aria-label="Cards Manager">
+        <div class="cards-panel">
+            <div class="settings-close-line" onclick="closeCardsManager()" role="button" aria-label="Close cards manager"></div>
+            <div class="card-tittle">• CARDS •</div>
+            <div id="cardsGridContainer"></div>
+        </div>
+    </section>
 
-    // --- UI/UX & ANIMACJE ---
-    updateProgress: function() {
-        if (this.state.ytInstance && typeof this.state.ytInstance.getPlayerState === 'function') {
-            const state = this.state.ytInstance.getPlayerState();
-            
-            if (state === 1 && !document.hidden) {
-                const duration = this.state.ytInstance.getDuration();
-                const currentTime = this.state.ytInstance.getCurrentTime();
-                
-                if (duration > 0) {
-                    const pct = (currentTime / duration) * 100;
-                    document.getElementById('player-progress-bar').style.width = pct + '%';
-                    
-                const curMins = Math.floor(currentTime / 60);
-                const curSecs = Math.floor(currentTime % 60);
-                const durMins = Math.floor(duration / 60);
-                const durSecs = Math.floor(duration % 60);
-                    const remaining = Math.floor(duration - currentTime);
-                    const mins = Math.floor(remaining / 60);
-                    const secs = remaining % 60;
-                  const timeStr = `-${mins}:${secs < 10 ? '0'+secs : secs}`;
-                  const timeString = `${curMins}:${curSecs < 10 ? '0'+curSecs : curSecs} / ${durMins}:${durSecs < 10 ? '0'+durSecs : durSecs}`;
-                
-                const upContainer = document.querySelector('#player-up-container span');
-                if (upContainer) upContainer.innerText = timeString;
-                    
-                    if (document.getElementById('player-time-remaining').innerText !== timeStr) {
-                        document.getElementById('player-time-remaining').innerText = timeStr;
-                    }
 
-                    const buffer = document.getElementById('player-buffer-bar');
-                    if(buffer) buffer.style.width = (this.state.ytInstance.getVideoLoadedFraction() * 100) + '%';
-                }
-            }
-        }
-        if (!document.hidden) {
-            this.state.rAF_ID = requestAnimationFrame(() => this.updateProgress());
-        }
-    },
+    <nav class="settings-dock" aria-label="System navigation dock">  
+        <input type="text" class="settings-field" value="⚙︎" readonly aria-label="System status icon">  
+        <button class="settings-add-card" onclick="newCardMannager()" aria-label="Add new card">+</button>  
+        <button class="settings-cards" onclick="showTabsManager()" aria-label="Open card manager">❖</button>
+        <button class="settings-button" id="dockBtn" aria-label="Open system menu">⛶</button>  
 
-    createSpikes: function() {
-        const system = document.getElementById('player-spike-system');
-        if (!system) return;
-        system.innerHTML = '';
-        const count = 50;
-        
-        for (let i = 0; i < count; i++) {
-            const spike = document.createElement('div');
-            spike.className = 'player-spike';
-            const angle = (i / count) * 360;
-            spike.style.setProperty('--hue', angle);
-            spike.style.setProperty('--angle', `${angle}deg`);
-            spike.style.animationDelay = `${Math.random() * 1}s`;
-            system.appendChild(spike);
-        }
-    },
+        <div class="dock-menu" id="dockMenu">  
+            <div class="menu-item" id="home-btn" role="button" aria-label="Home">⌂</div>  
+            <div class="menu-item" id="settings-btn" role="button" aria-label="Settings">֎</div>  
+            <div class="menu-item" role="button" aria-label="Next">➤</div>  
+        </div>  
+    </nav>
 
-    setupCursor: function() {
-        const cursor = document.getElementById('player-cursor');
-        const wrapper = document.getElementById('player-v-wrapper');
-        const controls = document.querySelector('.player-controls-bar');
-        
-        const showControls = () => {
-            controls.style.opacity = '1';
-            clearTimeout(this.state.hideTimeout);
-            this.state.hideTimeout = setTimeout(() => {
-                controls.style.opacity = '0';
-            }, 2222);
-        };
-
-        const moveCursor = (clientX, clientY) => {
-            cursor.style.opacity = '1';
-            cursor.style.left = clientX + 'px';
-            cursor.style.top = clientY + 'px';
-            clearTimeout(this.state.cursorTimeout);
-            this.state.cursorTimeout = setTimeout(() => {
-                cursor.style.opacity = '0';
-            }, 1770);
-        };
-
-        wrapper.addEventListener('mousemove', (e) => { moveCursor(e.clientX, e.clientY); showControls(); });
-        wrapper.addEventListener('touchstart', (e) => {
-            const t = e.touches[0]; moveCursor(t.clientX, t.clientY); showControls();
-        }, { passive: true });
-        wrapper.addEventListener('touchmove', (e) => {
-            const t = e.touches[0]; moveCursor(t.clientX, t.clientY);
-        }, { passive: true });
-
-        // Gestures integration for cursor
-        [document.getElementById('player-zone-left'), document.getElementById('player-zone-right')].forEach(zone => {
-            zone.addEventListener('touchmove', (e) => {
-                const t = e.touches[0]; moveCursor(t.clientX, t.clientY);
-            }, { passive: true });
-        });
-
-        document.querySelectorAll('.player-control-icon, #player-btn-play, .player-more-btn').forEach(el => {
-            el.addEventListener('mouseenter', () => cursor.style.transform = 'translate(-50%, -50%) scale(4)');
-            el.addEventListener('mouseleave', () => cursor.style.transform = 'translate(-50%, -50%) scale(1)');
-        });
-    },
-
-    setupHoverTitle: function() {
-        document.querySelector('.player-progress-container').addEventListener('mousemove', (e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            const hoverTime = pos * this.state.ytInstance.getDuration();
-            const mins = Math.floor(hoverTime / 60);
-            const secs = Math.floor(hoverTime % 60);
-            this.config.dom.title.innerText = `${mins}:${secs < 10 ? '0'+secs : secs}`;
-        });
-
-        document.querySelector('.player-progress-container').addEventListener('mouseleave', () => {
-            this.fetchOEmbed();
-        });
-    },
-   setupDownPanelGestures: function() {
-        const downContainer = document.getElementById('player-down-container');
-        if (!downContainer) return;
-
-        // 1. GESTY PRZESUWANIA (GÓRA / DÓŁ)
-        downContainer.addEventListener('touchstart', (e) => {
-            this.state.touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        window.addEventListener('touchmove', (e) => {
-            if (this.state.touchStartY === 0) return;
-
-            const currentY = e.touches[0].clientY;
-            const diff = this.state.touchStartY - currentY;
-
-            // Otwieranie (ruch w górę)
-            if (diff > 15) { 
-                downContainer.classList.add('is-active');
-                this.adjustPanelHeight();
-                this.state.touchStartY = 0; 
-            }
-            // Zamykanie (ruch w dół - tylko jeśli panel jest otwarty)
-            else if (diff < -15 && downContainer.classList.contains('is-active')) {
-                downContainer.classList.remove('is-active');
-                downContainer.style.height = '130px';
-                this.state.touchStartY = 0;
-            }
-        }, { passive: true });
-
-        window.addEventListener('touchend', () => {
-            this.state.touchStartY = 0;
-        });
-
-        // 2. ZAMYKANIE PRZEZ KLIKNIĘCIE W TŁO / POZA PANEL
-        window.addEventListener('touchstart', (e) => {
-            // Sprawdzamy: czy panel jest otwarty ORAZ czy dotknięte miejsce NIE jest panelem
-            if (downContainer.classList.contains('is-active') && !downContainer.contains(e.target)) {
-                downContainer.classList.remove('is-active');
-            }
-        }, { passive: true });
-    },
-    
-    adjustPanelHeight: function() {
-        const downContainer = document.getElementById('player-down-container');
-        if (!downContainer) return;
-
-        if (downContainer.classList.contains('is-active')) {
-            // Po prostu pozwalamy CSS-owi przejąć kontrolę nad wysokością 65.5vh
-            downContainer.style.height = ''; 
-        } else {
-            downContainer.style.height = '130px';
-        }
-    },
-};
-
-// --- ŁADOWANIE API YOUTUBE (Globalny Callback) ---
-var tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-document.head.appendChild(tag);
-
-// NAPRAWIONY CALLBACK API
-function onYouTubeIframeAPIReady() {
-    foxnorPlayer.init(); 
-
-    const currentId = foxnorPlayer.config.getVideoId();
-    foxnorPlayer.config.videoId = currentId;
-
-    foxnorPlayer.state.ytInstance = new YT.Player('player-main-iframe', {
-        videoId: currentId,
-        playerVars: { 
-            'controls': 0, 'fs': 0, 'modestbranding': 1, 'rel': 0, 
-            'enablejsapi': 1, 'iv_load_policy': 3,
-            'disablekb': 1, 'origin': window.location.origin
-        },
-        events: { 
-            'onReady': (e) => foxnorPlayer.onYouTubeReady(e),
-            'onStateChange': (e) => foxnorPlayer.onPlayerStateChange(e)
-        }
-    });
-}
-</script>
-</body>
+    <script src="script.js" defer></script>
+</body>  
 </html>
