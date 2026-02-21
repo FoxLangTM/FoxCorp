@@ -13,7 +13,6 @@ const debounce = (func, delay) => {
     };
 };
 
-// Bezpieczeństwo typów
 if (window.trustedTypes) {
     try {
         window.trustedTypes.createPolicy('myPolicy', {
@@ -23,7 +22,7 @@ if (window.trustedTypes) {
             },
             createScript: (input) => null
         });
-    } catch(e) { /* Policy already exists */ }
+    } catch(e) {  }
 }
 
 // ==================================//
@@ -36,6 +35,7 @@ const resultsSlots = Array.from(document.querySelectorAll(".result"));
 const dockBtn = document.getElementById("dockBtn");
 const homeBtn = document.getElementById("home-btn");
 
+let searchController = null;
 let selectedIndex = -1;
 let debounceTimer = null;
 let nextPage = 0;
@@ -85,7 +85,6 @@ function ensureResultsRoot() {
   return root;
 }
 
-// Pobieranie danych tekstowych przez Proxy
 async function fetchWithProxyText(url) {
   for (const p of proxies) {
     try {
@@ -96,7 +95,6 @@ async function fetchWithProxyText(url) {
   return null;
 }
 
-// Pobieranie wyników DuckDuckGo
 async function fetchResultsDDG(query, page = 0, perPage = 8) {
   const start = page * perPage;
   const text = await fetchWithProxyText(`https://duckduckgo.com/html/?q=${encodeURIComponent(query)}&s=${start}`);
@@ -129,6 +127,17 @@ function buildCardHTML(r) {
     </div>`;
 }
 
+async function fetchWithTimeout(url, timeout = 3000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(url, { signal: controller.signal, cache: "no-store" });
+        clearTimeout(id);
+        return response;
+    } catch (e) {
+        return null;
+    }
+}
 
 async function showSearchResults(query, reset=false) {
   if (!query || loading) return;
@@ -148,7 +157,7 @@ async function showSearchResults(query, reset=false) {
   results.filter(r => !shownLinks.has(r.link)).forEach((r, index) => {
     shownLinks.add(r.link);
     const card = document.createElement("div");
-    card.className="results-res-card hyper-animate"; // Animacja wejścia
+    card.className="results-res-card hyper-animate";
     card.style.animationDelay = `${index * 0.15}s`;
     card.innerHTML = buildCardHTML(r);
     grid.appendChild(card);
@@ -158,8 +167,6 @@ async function showSearchResults(query, reset=false) {
   nextPage++;
   loading = false;
 }
-
-
 
 async function showNextResults() {
     if (!currentQuery || loading) return;
@@ -184,11 +191,10 @@ async function showNextResults() {
     historyIndex = historyStack.length - 1;
     nextPage++;
 
-    // Wewnątrz showNextResults zastąp pętlę forEach:
 uniqueResults.forEach((r, index) => {
   const card = document.createElement("div");
-  card.className = "results-res-card hyper-animate"; // Dodaj klasę
-  card.style.animationDelay = `${index * 0.15}s`;   // Dodaj delay
+  card.className = "results-res-card hyper-animate";
+  card.style.animationDelay = `${index * 0.15}s`;
   card.innerHTML = buildCardHTML(r);
   grid.appendChild(card);
 });
@@ -209,7 +215,6 @@ function setupTrigger() {
 
 function startHold() {
   trigger.classList.add("active");
-  // Efekt "puchnięcia" przycisku podczas trzymania
   trigger.style.transform = "scale(1.1)";
   holdTimer = setTimeout(showNextResults, HOLD_TIME);
 }
@@ -217,7 +222,7 @@ function startHold() {
 function cancelHold() {
   clearTimeout(holdTimer);
   trigger.classList.remove("active");
-  trigger.style.transform = "scale(1)"; // Powrót do normy
+  trigger.style.transform = "scale(1)";
 }
 
 
@@ -230,62 +235,66 @@ function cancelHold() {
 document.addEventListener("DOMContentLoaded", setupTrigger);
 
 
-// ======= Suggestions =======
 async function fetchSuggestions(q){
   if(!q) return [];
   const target=`https://suggestqueries.google.com/complete/search?client=firefox&hl=${lang}&q=${encodeURIComponent(q)}`;
   for(const proxy of proxies){
     try{
-      const res=await fetch(proxy+encodeURIComponent(target),{cache:"no-store"});
-      if(!res||!res.ok) continue;
-      const txt=await res.text();
-      const parsed=JSON.parse(txt);
+      const res = await fetch(proxy + encodeURIComponent(target), {
+        cache: "no-store",
+        signal: searchController ? searchController.signal : null
+      });
+      if(!res || !res.ok) continue;
+      const txt = await res.text();
+      const parsed = JSON.parse(txt);
       if(Array.isArray(parsed[1])) return parsed[1];
-    }catch{}
+    } catch(e) {
+      if (e.name === 'AbortError') break;
+    }
   }
   return [];
 }
 function clearSlots(){ selectedIndex=-1; resultsSlots.forEach(r=>{r.textContent=""; r.classList.remove("filled","active");}); }
 
+const handleInput = debounce(async () => {
+    const q = input.value.trim();
+    if (!q) return clearSlots();
+    if (searchController) searchController.abort();
+    searchController = new AbortController();
+    const suggestions = await fetchSuggestions(q);
+    resultsSlots.forEach((slot, i) => {
+        if (suggestions[i]) {
+            slot.textContent = suggestions[i];
+            slot.classList.add("filled");
+            slot.style.animation = `hyperPop 0.4s var(--hyper-out) ${i * 0.04}s forwards`;
+        } else {
+            slot.textContent = "";
+            slot.classList.remove("filled", "active");
+        }
+    });
+}, 250);
+input.addEventListener("input", handleInput);
 
-
-
-input.addEventListener("input",()=>{
-  const q=input.value.trim(); selectedIndex=-1; if(!q) return clearSlots();
-  if(debounceTimer) clearTimeout(debounceTimer);
-// Znajdź miejsce, gdzie wypełniasz sloty sugestiami i zamień na to:
-debounceTimer = setTimeout(async () => {
-  const suggestions = await fetchSuggestions(q);
-  resultsSlots.forEach((slot, i) => {
-    if (suggestions[i]) {
-      slot.textContent = suggestions[i];
-      slot.classList.add("filled");
-      
-      // Reset animacji, aby przy każdym nowym znaku pola "drgały"
-      slot.style.animation = 'none';
-      slot.offsetHeight; // Trigger reflow
-      slot.style.animation = `hyperPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.04}s forwards`;
-    } else {
-      slot.textContent = "";
-      slot.classList.remove("filled", "active");
-      slot.style.animation = 'none';
+input.addEventListener("keydown", (e) => {
+    const filled = resultsSlots.filter(r => r.classList.contains("filled"));
+    if (e.key === "Enter") {
+        const q = (selectedIndex >= 0 && filled[selectedIndex]) 
+                  ? filled[selectedIndex].textContent 
+                  : input.value.trim();
+        if (q) {
+            showSearchResults(q, true);
+        }
+        return;
     }
-  });
-}, 200);
-});
-
-input.addEventListener("keydown",(e)=>{
-  const filled=resultsSlots.filter(r=>r.classList.contains("filled"));
-  if(!filled.length && e.key!=="Enter") return;
-  if(["ArrowDown","ArrowUp","Enter"].includes(e.key)) e.preventDefault();
-  if(e.key==="ArrowDown") selectedIndex=(selectedIndex+1)%filled.length;
-  else if(e.key==="ArrowUp") selectedIndex=(selectedIndex-1+filled.length)%filled.length;
-  else if(e.key==="Enter"){
-    const q=selectedIndex>=0 && filled[selectedIndex]?filled[selectedIndex].textContent:input.value.trim();
-    if(!q) return;
-    showSearchResults(q,true);
-  }
-  filled.forEach((r,i)=>r.classList.toggle("active",i===selectedIndex));
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        if (filled.length === 0) return;
+        
+        if (e.key === "ArrowDown") selectedIndex = (selectedIndex + 1) % filled.length;
+        else selectedIndex = (selectedIndex - 1 + filled.length) % filled.length;
+        
+        filled.forEach((r, i) => r.classList.toggle("active", i === selectedIndex));
+    }
 });
 
 resultsSlots.forEach(slot=>{
@@ -295,7 +304,6 @@ resultsSlots.forEach(slot=>{
   });
 });
 
-// Obsługa przycisków interfejsu
 btn?.addEventListener("click", () => {
   overlay.style.display = overlay.style.display === "flex" ? "none" : "flex";
   if (overlay.style.display === "flex") { overlay.classList.add("show"); input.focus(); }
@@ -310,7 +318,6 @@ homeBtn?.addEventListener("click", () => {
   window.scrollTo({top: 0, behavior: "smooth"});
 });
 
-// Zamykanie overlay po kliknięciu poza
 document.addEventListener("click", (e) => {
   const searchMenu = document.querySelector(".search-menu");
   const dockMenu = document.getElementById("dockMenu");
@@ -340,18 +347,15 @@ const settingsOverlay = document.getElementById("settingsOverlay");
 settingsBtn?.addEventListener("click", () => settingsOverlay?.classList.add("show"));
 settingsOverlay?.addEventListener("click", (e) => { if(e.target === settingsOverlay) settingsOverlay.classList.remove("show"); });
 
-// Przełączanie zakładek w ustawieniach
 const dots = document.querySelectorAll('.dot');
 dots.forEach((dot) => {
   dot.addEventListener('click', () => {
     dots.forEach(d => d.classList.remove('active'));
     dot.classList.add('active');
     
-    // Ukrywamy wszystkie warstwy
     document.querySelectorAll(".performance-control").forEach(el => el.style.display = "none");
     
-    // Pokazujemy odpowiednią
-    const targetId = `variation_${dot.dataset.layer}`; // np. variation_layer3
+    const targetId = `variation_${dot.dataset.layer}`;
     const targetLayer = document.getElementById(targetId);
     if(targetLayer) targetLayer.style.display = "flex";
   });
@@ -360,24 +364,19 @@ dots.forEach((dot) => {
 const toggle = document.querySelector('.toggle-knob');
 toggle?.addEventListener('click', () => toggle.classList.toggle('active'));
 
-// Główna funkcja optymalizacji (Clean Version)
 function applyOptimizations(level) {
   const body = document.body;
   
-  // 1. Reset
   body.classList.remove('max-power', 'balanced', 'optimized');
 
-  // 2. CZYŚCIMY BŁĘKITNE TŁO (Kluczowy krok)
   const activeCanvas = document.querySelector('canvas');
   if (activeCanvas) {
     activeCanvas.remove();
     console.log("FoxEngine: WebGL Background Cleaned");
   }
 
-  // 3. Aplikujemy tryb
   if (level == 100) { 
     body.classList.add('max-power');
-    // initWebGLNeonBackground(); // WYŁĄCZONE
     console.log("Tryb: Pełna Wydajność");
   } else if (level == 50) { 
     body.classList.add('balanced');
@@ -388,11 +387,9 @@ function applyOptimizations(level) {
   }
 }
 
-// Obsługa suwaka wydajności
 const perfRange = document.getElementById('perfRange3');
 const perfWrapper = document.querySelector('.performance-range-wrapper');
 
-// IndexedDB Logic
 const DB_NAME = 'FoxCorpDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'perfStore';
@@ -431,7 +428,6 @@ async function setValue(value) {
   } catch { sessionStorage.setItem(KEY, value); }
 }
 
-// Inicjalizacja suwaka
 (async () => {
   if (perfRange) {
       let savedValue = await getValue();
@@ -606,12 +602,10 @@ function newCardMannager() {
 }
 window.newCardMannager = newCardMannager;
 
-// Init DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
   ensureResultsRoot();
   setupTrigger();
-  
-  // URL Action Handler
+
   const urlParams = new URLSearchParams(window.location.search);
   const action = urlParams.get('action');
   if (action === 'search') setTimeout(() => document.getElementById('searchBtn')?.click(), 300);
