@@ -1,4 +1,17 @@
 // ==================================//
+// 1. KONFIGURACJA I NARZĘDZIA
+// ==================================//
+const debounce = (func, delay) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+};
+
+
+
+// ==================================//
 // 2. WYSZUKIWARKA I INTERFEJS
 // ==================================//
 const btn = document.getElementById("searchBtn");
@@ -45,12 +58,13 @@ function ensureResultsRoot() {
   if (!root) {
     root = document.createElement("div");
     root.className = "results-root";
+    root.style.zIndex = "10";
     root.innerHTML = `
       <div class="results-header"><h2 id="queryTitle"></h2></div>
       <div class="results-container">
         <div class="results-grid"></div>
       </div>
-      <div class="scroll-trigger">
+        <div class="scroll-trigger">
         <div class="trigger-dot"></div>
       </div>`;
     document.body.appendChild(root);
@@ -73,24 +87,27 @@ async function fetchResultsDDG(query, page = 0, perPage = 8) {
   const text = await fetchWithProxyText(`https://duckduckgo.com/html/?q=${encodeURIComponent(query)}&s=${start}`);
   if (!text) return [];
   const doc = new DOMParser().parseFromString(text, "text/html");
-  return Array.from(doc.querySelectorAll(".result")).map(r => {
+  const results = Array.from(doc.querySelectorAll(".result"));
+  return results.map(r => {
     const a = r.querySelector("a.result__a");
-    const url = a?.href || "";
-    const display = url.split('/')[2] || url;
+    const rawUrl = a?.href || "";
+    let cleanUrl = rawUrl;
+    if (rawUrl.includes("uddg=")) {
+        cleanUrl = decodeURIComponent(rawUrl.split("uddg=")[1].split("&")[0]);
+    }
+    const domain = cleanUrl.split('/')[2] || ""
     return {
-      title: a?.textContent?.trim() || "",
-      snippet: r.querySelector(".result__snippet")?.textContent?.trim() || "",
-      link: url,
-      image: `https://icons.duckduckgo.com/ip3/${display}.ico`
+      title: a?.textContent?.trim() || "Brak tytułu",
+      snippet: r.querySelector(".result__snippet")?.textContent?.trim() || "Brak opisu...",
+      link: cleanUrl,
+      image: domain ? `https://www.google.com/s2/favicons?sz=128&domain=${domain}&t=${Date.now()}` : ""
     };
   }).slice(0, perPage);
 }
 
-
-
 function buildCardHTML(r) {
   return `
-    <img src="${escapeHtml(r.image)}" class="results-res-thumb" loading="eager"/>
+    <img src="${escapeHtml(r.image)}" class="results-res-thumb" loading="eager" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=' "/>
     <div class="results-res-info">
       <h3>${escapeHtml(r.title)}</h3>
       <div class="results-res-desc">
@@ -128,13 +145,15 @@ async function fetchWithProxyText(url) {
 async function showSearchResults(query, reset=false) {
   if (!query || loading) return;
   currentQuery = query;
-  const root = ensureResultsRoot();
+  const root = ensureResultsRoot(); setupTrigger();
   const grid = root.querySelector(".results-grid");
+  const title = document.getElementById("queryTitle");
   
   if (reset) { 
       nextPage = 0; 
       shownLinks.clear(); 
       grid.innerHTML = ""; 
+      if(title) title.textContent = query;
       overlay.classList.remove("show");
       setTimeout(() => { overlay.style.display = "none"; }, 300);
   }
@@ -151,7 +170,8 @@ async function showSearchResults(query, reset=false) {
       card.innerHTML = buildCardHTML(r);
       grid.appendChild(card);
     });
-    root.style.display = "block";
+    root.style.display = "flex";
+    window.scrollTo({top: 0, behavior: 'smooth'});
   }
   
   nextPage++;
