@@ -1,5 +1,7 @@
 # LuxurySearchBar.Code
+# 🌘 FoxCorp | Corporative browser for browse
 
+![Logo](Images/FoxCorp.webp)
 
 <img 
   src="FoxCorp.webp" 
