@@ -1,15 +1,7 @@
 # LuxurySearchBar.Code
 # 🌘 FoxCorp | Corporative browser for browse
 
-![Logo](Images/FoxCorp.webp)
-
-<img 
-  src="FoxCorp.webp" 
-  alt="Logo" 
-  width="100" 
-  align="left" 
-  style="border-radius: 20px; margin-right: 10px;"
-/>
+![Logo](Images/FoxCorp.png)
 
 https://foxcorp.pages.dev/
 
