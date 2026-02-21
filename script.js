@@ -1,31 +1,4 @@
 // ==================================//
-// 1. KONFIGURACJA I NARZĘDZIA
-// ==================================//
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-}
-
-const debounce = (func, delay) => {
-    let timeout;
-    return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), delay);
-    };
-};
-
-if (window.trustedTypes) {
-    try {
-        window.trustedTypes.createPolicy('myPolicy', {
-            createHTML: (input) => {
-                if (/script|iframe|object|embed/i.test(input)) return '';
-                return input;
-            },
-            createScript: (input) => null
-        });
-    } catch(e) {  }
-}
-
-// ==================================//
 // 2. WYSZUKIWARKA I INTERFEJS
 // ==================================//
 const btn = document.getElementById("searchBtn");
