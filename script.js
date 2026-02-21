@@ -139,6 +139,19 @@ async function fetchWithTimeout(url, timeout = 3000) {
     }
 }
 
+async function fetchWithProxyText(url) {
+  for (const p of proxies) {
+    try {
+      const res = await fetch(p + encodeURIComponent(url), { 
+        cache: "no-store",
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+      });
+      if (res?.ok) return await res.text();
+    } catch(e) {}
+  }
+  return null;
+}
+
 async function showSearchResults(query, reset=false) {
   if (!query || loading) return;
   currentQuery = query;
@@ -237,7 +250,7 @@ document.addEventListener("DOMContentLoaded", setupTrigger);
 
 async function fetchSuggestions(q){
   if(!q) return [];
-  const target=`https://suggestqueries.google.com/complete/search?client=firefox&hl=${lang}&q=${encodeURIComponent(q)}`;
+  const target=`https://www.google.com/complete/search?client=chrome&q=${encodeURIComponent(q)}`;
   for(const proxy of proxies){
     try{
       const res = await fetch(proxy + encodeURIComponent(target), {
@@ -245,9 +258,8 @@ async function fetchSuggestions(q){
         signal: searchController ? searchController.signal : null
       });
       if(!res || !res.ok) continue;
-      const txt = await res.text();
-      const parsed = JSON.parse(txt);
-      if(Array.isArray(parsed[1])) return parsed[1];
+      const data = await res.json();
+      if(Array.isArray(data[1])) return data[1];
     } catch(e) {
       if (e.name === 'AbortError') break;
     }
