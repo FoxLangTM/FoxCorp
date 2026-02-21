@@ -162,21 +162,25 @@ async function showSearchResults(query, reset=false) {
       nextPage = 0; 
       shownLinks.clear(); 
       grid.innerHTML = ""; 
+      overlay.classList.remove("show");
+      setTimeout(() => { overlay.style.display = "none"; }, 300);
   }
   
   loading = true;
   const results = await fetchResultsDDG(query, nextPage, 18);
   
-  results.filter(r => !shownLinks.has(r.link)).forEach((r, index) => {
-    shownLinks.add(r.link);
-    const card = document.createElement("div");
-    card.className="results-res-card hyper-animate";
-    card.style.animationDelay = `${index * 0.15}s`;
-    card.innerHTML = buildCardHTML(r);
-    grid.appendChild(card);
-  });
+  if (results && results.length > 0) {
+    results.filter(r => !shownLinks.has(r.link)).forEach((r, index) => {
+      shownLinks.add(r.link);
+      const card = document.createElement("div");
+      card.className="results-res-card hyper-animate";
+      card.style.animationDelay = `${index * 0.1}s`;
+      card.innerHTML = buildCardHTML(r);
+      grid.appendChild(card);
+    });
+    root.style.display = "block";
+  }
   
-  root.style.display = "block";
   nextPage++;
   loading = false;
 }
@@ -251,11 +255,12 @@ document.addEventListener("DOMContentLoaded", setupTrigger);
 async function fetchSuggestions(q){
   if(!q) return [];
   const target=`https://www.google.com/complete/search?client=chrome&q=${encodeURIComponent(q)}`;
+  const controller = searchController; 
   for(const proxy of proxies){
     try{
       const res = await fetch(proxy + encodeURIComponent(target), {
         cache: "no-store",
-        signal: searchController ? searchController.signal : null
+        signal: controller ? controller.signal : null
       });
       if(!res || !res.ok) continue;
       const data = await res.json();
