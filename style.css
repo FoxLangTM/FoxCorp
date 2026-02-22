@@ -2,9 +2,7 @@
 body {
 margin:0; font-family:sans-serif; background:white; color:black; height:100vh; overflow:hidden;
 transition: background .3s, color .3s;
-
   background-attachment: fixed;
-
   --bg-dark: #040404;
   --text-white: #F9F9FA;
   --text-gray: #AFAFAF;
@@ -14,7 +12,6 @@ transition: background .3s, color .3s;
 }
 
 body {
-  /* Główny tekst: Red Hat Display Light */
   font-family: 'Red Hat Display', sans-serif;
   font-weight: 300;
   color: var(--text-white);
@@ -30,20 +27,16 @@ body {
   font-variation-settings:
     "wdth" 300;
 }
-
 h1, h2, h3 {
-  /* Nagłówki: Exo 2 Bold */
   font-family: 'Exo 2', sans-serif;
   font-weight: 700;
-  text-transform: uppercase; /* Exo 2 świetnie wygląda w Capslocku */
+  text-transform: uppercase;
   letter-spacing: 1px;
 }
-
 .subtext, .metadata {
-  /* Podtekst/Dane techniczne: Share Tech */
   font-family: 'Share Tech', monospace;
-  font-size: 14px; /* Share Tech przy 36px jest ogromny, do interfejsu lepiej go skalować */
-  color: var(--accent-green); /* Ten font idealnie pasuje do Twojej zieleni */
+  font-size: 14px;
+  color: var(--accent-green);
   text-transform: uppercase;
 }
 
@@ -55,23 +48,14 @@ user-select: none;
 }
 
 @media (prefers-color-scheme: dark) { body { background: #1A1B20; color:#fff; } }
-/*Przyszłość background: linear-gradient(to top, #2E43A8 0%, #040404 40%)*/
-
-@media (prefers-color-scheme: dark) { results-root { background: #131313;
- color: #D1D1DC;} }
- /*Przyszłość background: linear-gradient(180deg, #181819 0%, #131313 100%);*/
-
+@media (prefers-color-scheme: dark) { results-root { background: #131313; color: #D1D1DC;} }
 @media (prefers-color-scheme: light) { results-root { color: #2d2d2d;} }
 @media (prefers-color-scheme: light) { search-button { background-color: #B0B0B1;} }
 
-
-
-/* Globalna reguła dla wszystkich interaktywnych obiektów */
 .search-menu, .settings-panel, .results-res-card, .dock-menu, .dot, .settings-dock {
   transition: all 0.5s var(--hyper-out) !important;
 }
 
-/* Efekt naciśnięcia (Scale Down) dla KAŻDEGO klikalnego elementu */
 .results-res-card:active, .dot:active, .settings-button:active, .menu-item:active {
   transform: scale(0.92) !important;
   filter: brightness(0.8);
@@ -109,14 +93,13 @@ user-select: none;
  }
 .search-button:active {
    background-color: #2E43A8;
-  transform: scale(0.9); /* Reakcja na dotyk */
+  transform: scale(0.9);
 }
 .search-button:active span {
-  text-shadow: 0 0 10px #040404; /* Efekt neonu */
-  filter: blur(0.5px); /* Lekkie rozmycie "high-tech" */
-  transform: rotate(15deg); /* Delikatny obrót ikony przy kliknięciu */
+  text-shadow: 0 0 10px #040404;
+  filter: blur(0.5px);
+  transform: rotate(15deg);
 }
-
 
 .overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:950; }
 .overlay.show { display:flex; }
@@ -138,7 +121,6 @@ padding:10px 15px; display:flex; align-items:center;
 flex:1; background:transparent; border:none;
 outline:none; color:white; font-size:15px;
 }
-
 
 .result {
   opacity: 0;
@@ -167,20 +149,32 @@ cursor:pointer;
   transition: background 0.2s ease, transform 0.2s var(--hyper-out);
 }
 
-/* Efekt najechania myszką lub zaznaczenia strzałką */
 .result.active, .result.filled:hover {
   background: rgba(255, 255, 255, 0.15);
   transform: scale(1.03) translateX(5px);
   border-left: 3px solid #424242;
 }
 
-
-
-
+.settings-label {
+position: fixed;
+bottom: 0;
+left: 10px;
+display: flex;
+align-items:center;
+z-index:15; gap: 10px;
+box-shadow:0 0 12px rgba(0,0,0,0.5);
+background: #28282f;
+backdrop-filter: blur(10px);
+border: 2px solid #2F3136;
+border-bottom: none;
+border-radius:30px 20px 0 0px;
+padding:17px 105%;
+height:36px;
+}
 
 .settings-dock {
 position: fixed;
-bottom: 20px;
+bottom: 10px;
 right: 20px;
 display: flex;
 align-items:center;
@@ -228,7 +222,6 @@ cursor:pointer; font-size:18px; transition: background 0.2s;
 
 
 #dockMenu {
-  /* ... Twoje bazowe style ... */
   display: flex;
   opacity: 0;
   pointer-events: none;
@@ -479,8 +472,7 @@ left: 20px;
 }
 
 .performance-dot {
-  /* ... istniejące style ... */
-  touch-action: none; /* Zapobiega domyślnemu scrollowi na touch devices */
+  touch-action: none;
 }
 
 .performance-scale {
@@ -498,11 +490,6 @@ left: 20px;
   font-size: 20px;
   margin-top: 5px;
 }
-
-
-
-
-
 
 .performance-range-wrapper {
   width: 300px;
@@ -525,22 +512,22 @@ left: 20px;
 
 
 #perfRange3::-webkit-slider-thumb {
-  width: 24px; /* Większy dla łatwiejszego dotyku na mobile */
+  width: 24px;
   height: 24px;
   background: #FCFCFD;
-  border: 4px solid #00aaff; /* Obwódka w kolorze FoxCorp */
+  border: 4px solid #00aaff;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 #perfRange3:active::-webkit-slider-thumb {
-  transform: scale(1.3); /* "Puchnięcie" przy dotyku */
+  transform: scale(1.3);
 }
 
 
-#perfRange3:focus::-webkit-slider-thumb { /* Intensywniejszy podczas drag dla feedbacku */
+#perfRange3:focus::-webkit-slider-thumb {
   box-shadow: 0 0 25px rgba(0,170,255,1), inset 0 0 8px rgba(169,169,169,0.8);
-  background: linear-gradient(45deg, #00aaff, #a9a9a9); /* Odwrócony gradient dla dynamiki ruchu */
-  transform: scale(1.15); /* Lekki zoom podkreślający płynność */
+  background: linear-gradient(45deg, #00aaff, #a9a9a9);
+  transform: scale(1.15);
 }
 
 .max-power .performance-dot {
@@ -553,9 +540,6 @@ left: 20px;
   100% { box-shadow: 0 0 15px rgba(255, 51, 51, 0.4); }
 }
 
-
-
-
 .results-root {
 position: absolute;
 top: 0;
@@ -567,9 +551,8 @@ flex-direction: column;
 padding: 20px;
 overflow-y: auto;
 -webkit-overflow-scrolling: touch;
-z-index: 15;
+z-index: 10;
 }
-
 
 .results-container {
 flex: none;
@@ -622,7 +605,6 @@ border-radius: 3px;
 }
 .results-container::-webkit-scrollbar-track { background: transparent; }
 
-
 .results-res-card {
 display: flex;
 flex-direction: row;
@@ -638,7 +620,6 @@ transition: transform 0.2s, box-shadow 0.2s;
 
 .results-res-card {
     transform: translateY(20px);
-    /* Transition dla efektów hover/active */
     transition: transform 0.3s var(--hyper-out), box-shadow 0.3s ease;
 }
 
@@ -688,8 +669,6 @@ opacity: 0.7;
 letter-spacing: 2px;
 margin-bottom: 6px;
 }
-
-
 
 .results-res-text {
 font-size: 13px; color: #aaa; margin: 0 0 0.2px 0; line-height: 1.2em;
@@ -815,13 +794,12 @@ position: relative;
 
 .scroll-trigger {
 position: fixed;
-left: 15px;
-top: 92%;
-transform: translateY(-50%);
+left: 20px;
+bottom: 2%;
 width: 45px;
 height: 45px;
 cursor: pointer;
-z-index: 35;
+z-index: 100;
 display: flex;
 align-items: center;
 justify-content: center;
@@ -836,13 +814,13 @@ outline: none;
 }
 
 .trigger-dot {
-width: 45px;
-height: 45px;
+width: 37px;
+height: 37px;
 border-radius: 50%;
-background: #3e3e3e; 
+background: #3c3c3c; 
 position: relative;
 overflow: hidden;
-box-shadow: 0 0 10px rgba(0, 0, 255, 0.35);
+box-shadow: 0 0 10px rgba(0, 0, 200, 0.35);
 }
 
 .trigger-dot::before {
@@ -906,8 +884,6 @@ from -90deg,
   to { box-shadow: 0 0 25px #000344, 0 0 40px #000344; }
 }
 
-
-
 .fox-open-btn {
   background: none;
   border: none;
@@ -946,9 +922,6 @@ from -90deg,
   line-height: 1.6 !important;
 }
 
-
-
-/* Wymuszamy ukrycie na starcie */
 #iframed.hidden {
     display: none !important;
     opacity: 0 !important;
@@ -956,23 +929,21 @@ from -90deg,
 }
 
 #iframed {
-    display: flex; /* Zmieniamy na flex tylko gdy nie ma klasy .hidden */
+    display: flex;
     position: fixed;
     inset: 0;
-    z-index: 3000; /* Bardzo wysoki z-index */
+    z-index: 3000;
     background: rgba(0,0,0,0.9);
     align-items: center;
     flex-direction: column;
     transition: opacity 0.3s ease;
 }
 
-
-/* Kontener na przyciski - musi być nad iframe */
 .iframe-controls {
     width: 100%;
     height: 50px;
     position: relative;
-    z-index: 3001; /* Wyżej niż iframe */
+    z-index: 3001;
 }
 
 .iframe-kill {
@@ -989,7 +960,7 @@ from -90deg,
     height: 20px;
     border-radius: 50%;
     cursor: pointer;
-    z-index: 3005; /* Najwyżej */
+    z-index: 3005;
 }
 
 .iframe-kill { left: 20px; background-color: #CF3A2F; }
@@ -1001,12 +972,9 @@ from -90deg,
     height: calc(100% - 70px);
     border: none;
     border-radius: 12px;
-    z-index: 2999; /* Niżej niż przyciski */
+    z-index: 2999;
 }
 
-
-
-/* Zielony przycisk - Mini podgląd w rogu */
 #iframed.minimized {
     width: 300px !important;
     height: 180px !important;
@@ -1019,7 +987,6 @@ from -90deg,
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-/* Żółty przycisk - Tryb okienkowy */
 #iframed.compact {
     width: 70% !important;
     height: 70% !important;
@@ -1030,15 +997,13 @@ from -90deg,
 }
 
 #iframed {
-    display: flex !important; /* Musi być flex cały czas */
+    display: flex !important;
     position: fixed;
     inset: 0;
     z-index: 3000;
     background: rgba(0,0,0,0.9);
     align-items: center;
     flex-direction: column;
-
-    /* HYPER OS EFFECT */
     opacity: 0;
     pointer-events: none;
     transform: scale(1.1) translateY(30px);
@@ -1056,8 +1021,8 @@ from -90deg,
 .iframe-fullscreen {
     position: absolute;
     top: 15px;
-    right: 20px; /* Po prawej stronie paska */
-    width: 20px; /* Nieco szerszy, żeby zmieścić napis F11 lub ikonę */
+    right: 20px;
+    width: 20px;
     height: 20px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -1083,7 +1048,7 @@ from -90deg,
 
 .overlay.show, .settings-overlay.show {
   backdrop-filter: blur(12px);
-  background: rgba(0, 0, 0, 0.4); /* Ciemniejsza nakładka dla kontrastu */
+  background: rgba(0, 0, 0, 0.4);
 }
 
 
@@ -1094,18 +1059,15 @@ from -90deg,
     position: absolute;
     top: 15px;
     cursor: pointer;
-    z-index: 3005; /* Muszą być na samym wierzchu */
+    z-index: 3005;
 }
 
 
 .overlay.show, .settings-overlay.show {
   backdrop-filter: blur(12px);
-  background: rgba(0, 0, 0, 0.4); /* Ciemniejsza nakładka dla kontrastu */
+  background: rgba(0, 0, 0, 0.4);
 }
 
-
-
-/* Tytuł na zielono z poświatą */
 .card-tittle {
     font-family: 'Share Tech', monospace;
     color: #000;
@@ -1115,15 +1077,13 @@ from -90deg,
     margin-bottom: 25px;
 }
 
-/* Siatka dla prostokątów */
 .google-style-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Dwa obok siebie */
+    grid-template-columns: 1fr 1fr;
     gap: 15px;
     width: 100%;
 }
 
-/* Styl pojedynczej karty z Twojego screena */
 .tab-rect {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1189,39 +1149,31 @@ from -90deg,
 
 
 .cards-panel {
-    width: 85%;
-    max-width: 800px;
+    width: 70%;
+    max-width: 500px;
     height: 78%;
-    border-radius: 28px;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.25));
+    border-radius: 50px;
+    background: linear-gradient(145deg, rgba(255, 200, 200, 0.08), rgba(0, 0, 0, 0.25));
     backdrop-filter: blur(25px) saturate(160%);
     -webkit-backdrop-filter: blur(25px) saturate(160%);
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow:
-        inset 0 0 30px rgba(255, 255, 255, 0.05),
+        inset 0 0 30px rgba(255, 200, 200, 0.05),
         0 10px 40px rgba(0, 0, 0, 0.4),
-        0 0 25px rgba(0, 170, 255, 0.25);
-
-    /* Pozycjonowanie wewnątrz overlay */
+        0 0 25px rgba(20, 170, 200, 0.25);
     position: relative;
     display: flex;
     flex-direction: column;
     padding: 25px;
     overflow-y: auto;
-
-    /* Animacja wejścia */
     transform: translateY(50px);
     opacity: 0;
     transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
-
-/* Kiedy overlay ma klasę .show, panel wjeżdża do góry */
 #cardsOverlay.show .cards-panel {
     transform: translateY(0);
     opacity: 1;
 }
-
-/* Twoje style prostokątów i tytułu */
 .card-tittle {
     font-family: 'Share Tech', monospace;
     color: #000;
@@ -1230,7 +1182,6 @@ from -90deg,
     margin-bottom: 20px;
     letter-spacing: 2px;
 }
-
 
 .colors-img {
   position: absolute;
