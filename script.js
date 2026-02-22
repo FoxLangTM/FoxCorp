@@ -1,6 +1,10 @@
 // ==================================//
 // 1. KONFIGURACJA I NARZĘDZIA
 // ==================================//
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+}
+
 const debounce = (func, delay) => {
     let timeout;
     return (...args) => {
@@ -9,7 +13,17 @@ const debounce = (func, delay) => {
     };
 };
 
-
+if (window.trustedTypes) {
+    try {
+        window.trustedTypes.createPolicy('myPolicy', {
+            createHTML: (input) => {
+                if (/script|iframe|object|embed/i.test(input)) return '';
+                return input;
+            },
+            createScript: (input) => null
+        });
+    } catch(e) {  }
+}
 
 // ==================================//
 // 2. WYSZUKIWARKA I INTERFEJS
@@ -20,6 +34,7 @@ const input = document.getElementById("searchInput");
 const resultsSlots = Array.from(document.querySelectorAll(".result"));
 const dockBtn = document.getElementById("dockBtn");
 const homeBtn = document.getElementById("home-btn");
+const FOX_ENGINE = "https://foxcorp-engine.foxlang-team.workers.dev/?url=";
 
 let searchController = null;
 let selectedIndex = -1;
@@ -73,13 +88,21 @@ function ensureResultsRoot() {
 }
 
 async function fetchWithProxyText(url) {
-  for (const p of proxies) {
     try {
-      const res = await fetch(p + encodeURIComponent(url), { cache: "no-store" });
-      if (res?.ok) return await res.text();
-    } catch {}
-  }
-  return null;
+        const response = await fetch(FOX_ENGINE + encodeURIComponent(url), {
+            cache: "no-store",
+            headers: { "X-Requested-With": "FoxEngine-Core" }
+        });
+
+        if (response.ok) {
+            return await response.text();
+        }
+        
+        console.warn(`FoxEngine: Serwer's added status ${response.status}`);
+    } catch (e) {
+        console.error("FoxEngine: Critical engine Error", e);
+    }
+    return null;
 }
 
 async function fetchResultsDDG(query, page = 0, perPage = 8) {
