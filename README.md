@@ -1,4 +1,4 @@
-# LuxurySearchBar.Code
+# FoxCorp
 # 🌘 FoxCorp | Corporative browser for browse
 
 ![Logo](Images/FoxCorp.png)
