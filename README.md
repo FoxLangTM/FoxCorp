@@ -1,7 +1,7 @@
 # FoxCorp
 # 🌘 FoxCorp | Corporative browser for browse
 
-![Logo](Images/FoxCorp.png)
+![Logo](Images/FoxCor.png)
 
 https://foxcorp.pages.dev/
 
