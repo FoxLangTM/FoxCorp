@@ -2,7 +2,6 @@
 # 🌘 FoxCorp | Corporative browser for browse
 
 <img src="https://raw.githubusercontent.com/FoxLangTM/FoxCorp/refs/heads/main/Images/FoxCorp.png">
-![Logo](Images/FoxCorp.png)
 
 https://foxcorp.pages.dev/
 
